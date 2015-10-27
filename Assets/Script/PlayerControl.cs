@@ -9,7 +9,6 @@ using System.Collections;
 namespace ActionGame
 {
 	public class PlayerControl : MonoBehaviour {
-		float m_MoveSpeed;
 		Vector3 m_TempVec3, m_TempAnlge;
 		KeyPadControl m_KeyPad = null;
 		AnimationManagerPlayer m_AnimationManager;
@@ -19,21 +18,36 @@ namespace ActionGame
 		/// </summary>
 		public enum PLAYER_STATE
 		{
-			PS_None,
-			PS_Walk,
-			PS_Run,
-			PS_Dead
+			PS_IDLE,
+			PS_WALK,
+			PS_RUN,
+			PS_DEAD
 		}
-		PLAYER_STATE m_State;
-		public PLAYER_STATE M_State {
-			get { return m_State; }
-			set { m_State = value; }
+
+		// 类型
+		public enum PLAYER_TYPE
+		{
+			PT_MAGE
+		}
+
+		// 数据集合
+		public struct PlayerData
+		{
+			public PLAYER_TYPE type;
+			public PLAYER_STATE state;
+			public Global.Attribute attrib;
+		}
+		PlayerData m_Data;
+		public PlayerData Data {
+			get { return m_Data; }
+			set { m_Data = value; }
 		}
 
 		// Use this for initialization
 		void Start () 
 		{
-			m_MoveSpeed = Global.g_PlayerMoveSpeed;
+			_InitData();
+
 			m_KeyPad = Global.GetKeyPad();
 			m_TempVec3 = new Vector3();
 			m_TempAnlge = new Vector3();
@@ -45,16 +59,36 @@ namespace ActionGame
 		{
 			if( m_KeyPad.Dir != KeyPadControl.DIR.D_NONE )
 			{
-				DirProcess();
+				_DirProcess();
 				m_AnimationManager.m_CurAnimationProcessor = m_AnimationManager.Run;
+				m_Data.state = PLAYER_STATE.PS_RUN;
 			}
 			else
 			{
 				m_AnimationManager.m_CurAnimationProcessor = m_AnimationManager.Idle;
+				m_Data.state = PLAYER_STATE.PS_IDLE;
 			}
 		}
 
-		void DirProcess()
+		void _InitData()
+		{
+			m_Data.type = PLAYER_TYPE.PT_MAGE;
+			m_Data.state = PLAYER_STATE.PS_IDLE;
+
+			m_Data.attrib.hp = 100.0f;
+			m_Data.attrib.maxHp = 100.0f;
+			m_Data.attrib.eng = 100.0f;
+			m_Data.attrib.maxEng = 100.0f;
+			m_Data.attrib.atkPhy = 20.0f;
+			m_Data.attrib.atkMag = 40.0f;
+			m_Data.attrib.defPhy = 20.0f;
+			m_Data.attrib.defMag = 40.0f;
+			m_Data.attrib.atkSp = 1.0f;
+			m_Data.attrib.movSp = Global.g_PlayerMoveSpeed;
+			m_Data.attrib.atkRange = 5.0f;
+		}
+
+		void _DirProcess()
 		{
 			m_TempVec3.Set(0, 0, 0);
 			m_TempAnlge.Set(transform.eulerAngles.x, transform.eulerAngles.y, transform.eulerAngles.z);
@@ -116,7 +150,7 @@ namespace ActionGame
 				break;
 			}
 
-			transform.position += m_TempVec3 *(m_MoveSpeed*Time.deltaTime);
+			transform.position += m_TempVec3 *(m_Data.attrib.movSp*Time.deltaTime);
 			transform.eulerAngles = m_TempAnlge;
 		}
 
@@ -128,7 +162,20 @@ namespace ActionGame
 		/// </returns>
 		public bool IsDead()
 		{
-			return m_State == PLAYER_STATE.PS_Dead;
+			return m_Data.state == PLAYER_STATE.PS_DEAD;
+		}
+
+		public void OnBeAttack(float atkVal)
+		{
+			m_Data.attrib.hp -= atkVal;
+			if(m_Data.attrib.hp < 0)
+			{
+				m_Data.attrib.hp = 0;
+			}
+
+			// 血条做出反应
+			PlayingManager.Inst.AttribPanel.OnHpBarChange( m_Data.attrib.hp / m_Data.attrib.maxHp,
+			               m_Data.attrib.hp.ToString() + "/" + m_Data.attrib.maxHp.ToString() );
 		}
 	}
 }

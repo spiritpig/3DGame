@@ -18,7 +18,8 @@ namespace ActionGame
 			public AnimationClip Animation;
 			public float AnimatTime;
 		}
-		AnimatData m_Idle, m_Run;
+		AnimatData m_Idle, m_Run, m_Attack;
+		bool m_IsAttacked = false;
 		
 		// Use this for initialization
 		void Start () 
@@ -45,11 +46,15 @@ namespace ActionGame
 		{
 			m_Idle = new AnimatData();
 			m_Idle.AnimatTime = Global.g_PlayerIdleAnimatTime;
-			m_Idle.Animation = m_AnimationComponent.GetClip( "Wolf-Idle" );
+			m_Idle.Animation = m_AnimationComponent.GetClip( "Idle" );
 			
 			m_Run = new AnimatData();
 			m_Run.AnimatTime = Global.g_PlayerRunAnimatTime;
-			m_Run.Animation = m_AnimationComponent.GetClip( "Wolf-Walk" );
+			m_Run.Animation = m_AnimationComponent.GetClip( "Walk" );
+
+			m_Attack = new AnimatData();
+			m_Attack.AnimatTime = Global.g_PlayerRunAnimatTime;
+			m_Attack.Animation = m_AnimationComponent.GetClip( "Attack1" );
 		}
 		
 		/// <summary>
@@ -65,6 +70,28 @@ namespace ActionGame
 		{
 			m_AnimationComponent.Play( m_Run.Animation.name );
 			m_AnimationComponent[ m_Run.Animation.name ].speed = m_Run.AnimatTime;
+		}
+
+		public void Attack()
+		{
+			m_AnimationComponent.Play( m_Attack.Animation.name );
+			m_AnimationComponent[ m_Attack.Animation.name ].speed = m_Attack.AnimatTime;
+		}
+
+		/// <summary>
+		// 判断攻击是否结束
+		/// </summary>
+		public bool IsAttackEnd()
+		{
+			if(m_CurAnimationProcessor == Attack &&
+			   !m_IsAttacked &&
+			   m_AnimationComponent[ m_Attack.Animation.name ].normalizedTime >= 0.9f)
+			{
+				m_IsAttacked = true;
+				return true;
+			}
+			m_IsAttacked = false;
+			return false;
 		}
 	}
 }

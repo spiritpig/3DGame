@@ -27,6 +27,24 @@ namespace ActionGame
 		/// </summary>
 		public const string g_MainScene = "playing";
 
+		/// <summary>
+		/// 共享数据结构
+		/// </summary>
+		public struct Attribute
+		{
+			public float hp;			// 生命值
+			public float maxHp;			// 生命值
+			public float eng;			// 能量
+			public float maxEng;		// 生命值
+			public float atkPhy;		// 物理攻击
+			public float atkMag;		// 魔法攻击
+			public float defPhy;		// 物理防御
+			public float defMag;		// 魔法防御
+			public float movSp;			// 移动速度
+			public float atkSp;			// 攻击速度
+			public float atkRange;		// 攻击范围
+		}
+
 
 		static KeyPadControl g_KeyPad = null;
 		/// <summary>
