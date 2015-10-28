@@ -15,7 +15,6 @@ namespace ActionGame
 			ET_IDLE,
 			ET_BACK_IDLE,		// 回到初始位置
 			ET_BODY_ROTATE,
-			ET_WALK,
 			ET_CHASE,
 			ET_ATTACK,
 			ET_DEATH
@@ -46,7 +45,6 @@ namespace ActionGame
 		{
 			public ENEMYTYPE type;
 			public ENEMYSTATE state;
-			public float moveSpeed;
 			public EnemySearchData searchData;
 			public EnemyChaseData chaseData;
 			public Global.Attribute attrib;
@@ -62,7 +60,7 @@ namespace ActionGame
 		Vector2 m_TempVec2;
 		ENEMYSTATE m_NextState;
 		float m_CurBreakTime = 0.0f, m_CurChaseTime = 0.0f, 
-				m_TempFloat = 0.0f, m_RotateSpeed = 6.0f;
+				m_TempFloat = 0.0f, m_RotateSpeed = 10.0f;
 		CharacterController m_Controller;
 		AnimationManagerEnemy m_AnimationManager;
 
@@ -72,6 +70,8 @@ namespace ActionGame
 			m_Controller = GetComponent<CharacterController>();
 			m_AnimationManager = gameObject.GetComponent<AnimationManagerEnemy>();
 			m_NextState = ENEMYSTATE.ET_IDLE;
+			m_TempVec3 = new Vector3();
+			m_Dir = new Vector3();
 
 			_InitData();
 		}
@@ -83,37 +83,16 @@ namespace ActionGame
 			{
 			case ENEMYSTATE.ET_IDLE:
 				{
-					m_CurBreakTime -= Time.deltaTime;
-					
-					// 休息完成，继续搜索
-					if(m_CurBreakTime <= 0.0f)
+					if(_IsPlayerInRange())
 					{
-						// 计算新的目标点
-						m_TempVec2.x = Random.Range( -m_Data.searchData.range, m_Data.searchData.range );
-						m_TempVec2.y = Random.Range( -m_Data.searchData.range, m_Data.searchData.range );
-						m_TargetPostion.x = m_Data.searchData.centrPoint.x + m_TempVec2.x;
-						m_TargetPostion.y = m_Data.searchData.centrPoint.y;
-						m_TargetPostion.z = m_Data.searchData.centrPoint.z + m_TempVec2.y;
-						
-						//	计算运动方向
-						m_PrevDir = m_Dir;
-						m_Dir = m_TargetPostion - transform.position;
-						m_Dir.Normalize();
-
-						// 计算转向向量 备用
-						m_TempVec3 = m_TargetPostion - transform.position;
-						m_Data.state = ENEMYSTATE.ET_BODY_ROTATE;
-						m_NextState = ENEMYSTATE.ET_WALK;
-
-						// 切换到行走动画
-						m_AnimationManager.m_CurAnimationProcessor = m_AnimationManager.Walk;
+						_OnChaseStart();
 					}
 				}
 				break;
 
 			case ENEMYSTATE.ET_BACK_IDLE:
 				{
-					m_Controller.SimpleMove(m_Dir*m_Data.moveSpeed);
+					m_Controller.SimpleMove(m_Dir*m_Data.attrib.movSp);
 
 					// 若回到了起点，继续搜索
 					if(_IsBackCentr())
@@ -139,31 +118,6 @@ namespace ActionGame
 				}
 				break;
 
-			case ENEMYSTATE.ET_WALK:
-				{
-					// 若玩家在攻击范围内，则追上他
-					if( _IsPlayerInRange() )
-					{
-						_OnChaseStart();
-						break;
-					}
-
-					// 继续更新怪物的移动
-					if(_IsInSearchRange())
-					{
-						m_Controller.SimpleMove(m_Dir*m_Data.moveSpeed);
-					}
-					else
-					{
-						_AdjustPosition();
-						m_CurBreakTime = Random.Range(m_Data.searchData.breakTime.x, 
-					                              		m_Data.searchData.breakTime.y);
-
-						_OnIdle();
-                    }
-				}
-				break;
-
 			// 发现玩家了，往死里追
 			case ENEMYSTATE.ET_CHASE:
 				{
@@ -184,7 +138,7 @@ namespace ActionGame
 					// 朝着 玩家移动
 					m_Dir = PlayingManager.Inst.Player.transform.position - transform.position;
 					m_Dir.Normalize();
-					m_Controller.SimpleMove(m_Dir*m_Data.moveSpeed);
+					m_Controller.SimpleMove(m_Dir*m_Data.attrib.movSp);
 					transform.LookAt(PlayingManager.Inst.Player.transform.position);
 				}
 				break;
@@ -212,7 +166,6 @@ namespace ActionGame
 		{
 			m_Data.type = ENEMYTYPE.ET_WOLFMAN;
 			m_Data.state = ENEMYSTATE.ET_IDLE;
-			m_Data.moveSpeed = 1.0f;
 			m_Data.searchData.centrPoint = new Vector3();
 			m_Data.searchData.centrPoint = transform.position;
 			m_Data.searchData.breakTime = new Vector3(0.5f, 3.0f);
@@ -316,21 +269,9 @@ namespace ActionGame
 		}
 
 		/// <summary>
-		/// 在怪物移动出，搜索范围后，将其位置修正到搜索范围圈内。
-		/// 避免下一次移动时，未移动、便判定为不可移动。
+		/// 准备怪物转身
 		/// </summary>
-		void _AdjustPosition()
-		{
-			// Dir为当前位置到目标点的位置，而修正时需要有中心点到当前未知的方向
-			// 所以，需要重新计算。
-			m_Dir = transform.position - m_Data.searchData.centrPoint;
-			m_Dir.Normalize();
-
-			m_TempVec3 = m_Dir*(m_Data.searchData.range - 0.001f);
-			m_TempVec3 += m_Data.searchData.centrPoint;
-			transform.position = m_TempVec3;
-		}
-
+		/// <param name="nextState">Next state.</param>
 		void _PrepareBodyRotate(ENEMYSTATE nextState)
 		{
 			m_Data.state = ENEMYSTATE.ET_BODY_ROTATE;

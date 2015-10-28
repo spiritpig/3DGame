@@ -32,6 +32,7 @@ namespace ActionGame
 		/// </summary>
 		public struct Attribute
 		{
+			public string charName;
 			public float hp;			// 生命值
 			public float maxHp;			// 生命值
 			public float eng;			// 能量
@@ -43,22 +44,6 @@ namespace ActionGame
 			public float movSp;			// 移动速度
 			public float atkSp;			// 攻击速度
 			public float atkRange;		// 攻击范围
-		}
-
-
-		static KeyPadControl g_KeyPad = null;
-		/// <summary>
-		/// 获取虚拟键盘，不保证返回值的正确性。
-		/// 请确保虚拟键盘的返回值不为NULL
-		/// </summary>
-		public static KeyPadControl GetKeyPad()
-		{
-			if(g_KeyPad == null)
-			{
-				g_KeyPad = GameObject.FindGameObjectWithTag( "KeyPad" ).GetComponent<KeyPadControl>();
-			}
-
-			return g_KeyPad;
 		}
 	}
 }

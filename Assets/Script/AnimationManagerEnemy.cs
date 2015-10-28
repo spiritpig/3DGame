@@ -87,6 +87,7 @@ namespace ActionGame
 			   !m_IsAttacked &&
 			   m_AnimationComponent[ m_Attack.Animation.name ].normalizedTime >= 0.9f)
 			{
+				Debug.Log( "BEAttack" );
 				m_IsAttacked = true;
 				return true;
 			}

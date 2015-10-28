@@ -13,7 +13,6 @@ namespace ActionGame
 		public delegate void AnimationProcessor();
 		public AnimationProcessor m_CurAnimationProcessor = null;
 
-		KeyPadControl m_KeyPad;
 		Animation m_AnimationComponent;
 		struct AnimatData
 		{
@@ -25,7 +24,6 @@ namespace ActionGame
 		// Use this for initialization
 		void Start () 
 		{
-			m_KeyPad = Global.GetKeyPad();
 			m_AnimationComponent = gameObject.GetComponent<Animation>();
 
 			DataInit();

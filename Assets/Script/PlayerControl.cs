@@ -10,7 +10,6 @@ namespace ActionGame
 {
 	public class PlayerControl : MonoBehaviour {
 		Vector3 m_TempVec3, m_TempAnlge;
-		KeyPadControl m_KeyPad = null;
 		AnimationManagerPlayer m_AnimationManager;
 
 		/// <summary>
@@ -30,12 +29,29 @@ namespace ActionGame
 			PT_MAGE
 		}
 
+		public class LevelData
+		{
+			public int level;			// 当前等级
+			public int exp;				// 经验值
+			public int levelUpExp;		// 升级所需经验值
+
+			void LevelUp()
+			{
+				if(exp >= levelUpExp)
+				{
+					level += 1;
+					levelUpExp = levelUpExp + levelUpExp*(level/10 + 1);
+				}
+			}
+		}
+
 		// 数据集合
 		public struct PlayerData
 		{
 			public PLAYER_TYPE type;
 			public PLAYER_STATE state;
 			public Global.Attribute attrib;
+			public LevelData levelData;
 		}
 		PlayerData m_Data;
 		public PlayerData Data {
@@ -48,7 +64,6 @@ namespace ActionGame
 		{
 			_InitData();
 
-			m_KeyPad = Global.GetKeyPad();
 			m_TempVec3 = new Vector3();
 			m_TempAnlge = new Vector3();
 			m_AnimationManager = gameObject.GetComponent<AnimationManagerPlayer>();
@@ -57,7 +72,7 @@ namespace ActionGame
 		// Update is called once per frame
 		void Update () 
 		{
-			if( m_KeyPad.Dir != KeyPadControl.DIR.D_NONE )
+			if( KeyPadControl.Inst.Dir != KeyPadControl.DIR.D_NONE )
 			{
 				_DirProcess();
 				m_AnimationManager.m_CurAnimationProcessor = m_AnimationManager.Run;
@@ -75,6 +90,7 @@ namespace ActionGame
 			m_Data.type = PLAYER_TYPE.PT_MAGE;
 			m_Data.state = PLAYER_STATE.PS_IDLE;
 
+			m_Data.attrib.charName = "Mage";
 			m_Data.attrib.hp = 100.0f;
 			m_Data.attrib.maxHp = 100.0f;
 			m_Data.attrib.eng = 100.0f;
@@ -86,6 +102,11 @@ namespace ActionGame
 			m_Data.attrib.atkSp = 1.0f;
 			m_Data.attrib.movSp = Global.g_PlayerMoveSpeed;
 			m_Data.attrib.atkRange = 5.0f;
+
+			m_Data.levelData = new LevelData();
+			m_Data.levelData.level = 1;
+			m_Data.levelData.exp = 0;
+			m_Data.levelData.levelUpExp = 100;
 		}
 
 		void _DirProcess()
@@ -94,7 +115,7 @@ namespace ActionGame
 			m_TempAnlge.Set(transform.eulerAngles.x, transform.eulerAngles.y, transform.eulerAngles.z);
 
 			// 朝向和位置都要变
-			switch( m_KeyPad.Dir )
+			switch( KeyPadControl.Inst.Dir )
 			{
 			case KeyPadControl.DIR.D_UP:
 				{
