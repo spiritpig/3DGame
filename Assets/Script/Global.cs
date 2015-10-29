@@ -45,5 +45,20 @@ namespace ActionGame
 			public float atkSp;			// 攻击速度
 			public float atkRange;		// 攻击范围
 		}
+
+		// 方向
+		public enum DIR
+		{
+			D_NONE,
+			D_UP,
+			D_DOWN,
+			D_LEFT,
+			D_RIGHT,
+			
+			D_LEFTUP,
+			D_LEFTDOWN,
+			D_RIGHTUP,
+			D_RIGHTDOWN
+		}
 	}
 }

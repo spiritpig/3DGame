@@ -1,12 +1,12 @@
 #!/bin/bash
 
-git add Assets/Prefab
-git add Assets/Prefab.meta
-git add Assets/Scene
-git add Assets/Scene.meta
-git add Assets/Script
-git add Assets/Script.meta
-git add Assets/Sprite
-git add Assets/Sprite.meta
-git commit -m "$@"
+git add Assets/Resources/Prefab
+git add Assets/Resources/Prefab.meta
+git add Assets/Resources/Scene
+git add Assets/Resources/Scene.meta
+git add Assets/Resources/Script
+git add Assets/Resources/Script.meta
+git add Assets/Resources/Sprite
+git add Assets/Resources/Sprite.meta
+git commit -am "$@"
 git push origin master

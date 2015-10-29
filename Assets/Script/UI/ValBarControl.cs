@@ -17,19 +17,35 @@ namespace ActionGame
 		// Use this for initialization
 		void Start () 
 		{
+			Init();
+		}
+
+		public void Init()
+		{
 			m_ScrollBar = GetComponent<Scrollbar>();
 			m_Content = m_ScrollBar.handleRect.gameObject.GetComponent<Image>();
 			m_ValText = gameObject.GetComponentInChildren<Text>();
-
+			
+			// 加载遮罩材质，并设置参数
+			Material mat = Resources.Load("Material/MaskMat") as Material;
+			m_Content.material = Instantiate(mat) as Material;
 			m_Content.material.SetFloat("_MaskWidth", 1.0f);
 			m_Content.material.SetTexture("_MainTex", m_Content.sprite.texture);
-			m_Content.material.SetColor("_Color", m_Content.color);
+            m_Content.material.SetColor("_Color", m_Content.color);
 		}
 		
 		public void OnValueChange(float val, string valStr)
 		{
-			m_Content.material.SetFloat("_MaskWidth", val);
-			m_ValText.text = valStr;
+            m_Content.material.SetFloat("_MaskWidth", val);
+			if( m_ValText != null )
+			{
+				m_ValText.text = valStr;
+			}
+			else
+			{
+				m_ValText = gameObject.GetComponentInChildren<Text>();
+				m_ValText.text = valStr;
+			}
 		}
 	}
 }

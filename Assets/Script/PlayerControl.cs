@@ -10,6 +10,7 @@ namespace ActionGame
 {
 	public class PlayerControl : MonoBehaviour {
 		Vector3 m_TempVec3, m_TempAnlge;
+		Global.DIR m_Dir = Global.DIR.D_NONE;
 		AnimationManagerPlayer m_AnimationManager;
 
 		/// <summary>
@@ -59,8 +60,8 @@ namespace ActionGame
 			set { m_Data = value; }
 		}
 
-		// Use this for initialization
-		void Start () 
+		// Player初始化，有我们自己完成
+		public void Init() 
 		{
 			_InitData();
 
@@ -72,7 +73,9 @@ namespace ActionGame
 		// Update is called once per frame
 		void Update () 
 		{
-			if( KeyPadControl.Inst.Dir != KeyPadControl.DIR.D_NONE )
+			CalcCurDir();
+
+			if( m_Dir != Global.DIR.D_NONE )
 			{
 				_DirProcess();
 				m_AnimationManager.m_CurAnimationProcessor = m_AnimationManager.Run;
@@ -115,54 +118,54 @@ namespace ActionGame
 			m_TempAnlge.Set(transform.eulerAngles.x, transform.eulerAngles.y, transform.eulerAngles.z);
 
 			// 朝向和位置都要变
-			switch( KeyPadControl.Inst.Dir )
+			switch( m_Dir )
 			{
-			case KeyPadControl.DIR.D_UP:
+			case Global.DIR.D_UP:
 				{
 					m_TempVec3.z = -1.0f;
 					m_TempAnlge.y = 180;
 				}
 				break;
-			case KeyPadControl.DIR.D_DOWN:
+			case Global.DIR.D_DOWN:
 				{
 					m_TempVec3.z = 1.0f;
 					m_TempAnlge.y = 0;
 				}
 				break;
-			case KeyPadControl.DIR.D_LEFT:
+			case Global.DIR.D_LEFT:
 				{
 					m_TempVec3.x = 1.0f;
 					m_TempAnlge.y = 90;
 				}
 				break;
-			case KeyPadControl.DIR.D_RIGHT:
+			case Global.DIR.D_RIGHT:
 				{
 					m_TempVec3.x = -1.0f;
 					m_TempAnlge.y = 270;
 				}
 				break;
-			case KeyPadControl.DIR.D_LEFTUP:
+			case Global.DIR.D_LEFTUP:
 				{
 					m_TempVec3.x = 1.0f;
 					m_TempVec3.z = -1.0f;
 					m_TempAnlge.y = 135;
 				}
 				break;
-			case KeyPadControl.DIR.D_LEFTDOWN:
+			case Global.DIR.D_LEFTDOWN:
 				{
 					m_TempVec3.x = 1.0f;
 					m_TempVec3.z = 1.0f;
 					m_TempAnlge.y = 45;
 				}
 				break;
-			case KeyPadControl.DIR.D_RIGHTUP:
+			case Global.DIR.D_RIGHTUP:
 				{
 					m_TempVec3.x = -1.0f;
 					m_TempVec3.z = -1.0f;
 					m_TempAnlge.y = 235;
 				}
 				break;
-			case KeyPadControl.DIR.D_RIGHTDOWN:
+			case Global.DIR.D_RIGHTDOWN:
 				{
 					m_TempVec3.x = -1.0f;
 					m_TempVec3.z = 1.0f;
@@ -176,11 +179,67 @@ namespace ActionGame
 		}
 
 		/// <summary>
+		/// 根据当前的轴距确定角色的行进方向
+		/// </summary>
+		void CalcCurDir()
+		{
+			float vertAxis = ETCInput.GetAxis("Vertical");
+			float horiAxis = ETCInput.GetAxis("Horizontal");
+
+			if(vertAxis > 0.0f)
+			{
+				if(horiAxis.CompareTo(0.0f) == 0)
+				{
+					m_Dir = Global.DIR.D_UP;
+				}
+				else
+				if(horiAxis < 0.0f)
+				{
+					m_Dir = Global.DIR.D_LEFTUP;
+				}
+				else
+				{
+					m_Dir = Global.DIR.D_RIGHTUP;
+				}
+			}
+			else
+			if(vertAxis < 0.0f)
+			{
+				if(horiAxis.CompareTo(0.0f) == 0)
+				{
+					m_Dir = Global.DIR.D_DOWN;
+				}
+				else
+					if(horiAxis < 0.0f)
+				{
+					m_Dir = Global.DIR.D_LEFTDOWN;
+				}
+				else
+				{
+					m_Dir = Global.DIR.D_RIGHTDOWN;
+				}
+			}
+			else
+			{
+				if(horiAxis > 0.0f)
+				{
+					m_Dir = Global.DIR.D_RIGHT;
+				}
+				else
+				if(horiAxis < 0.0f)
+				{
+					m_Dir = Global.DIR.D_LEFT;
+				}
+				else
+				{
+					m_Dir = Global.DIR.D_NONE;
+				}
+			}
+		}
+
+		/// <summary>
 		/// Determines whether this instance is dead.
 		/// </summary>
-		/// <returns>
-		/// <c>true</c> if this instance is dead; otherwise, <c>false</c>.
-		/// </returns>
 		public bool IsDead()
 		{
 			return m_Data.state == PLAYER_STATE.PS_DEAD;

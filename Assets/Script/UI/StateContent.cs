@@ -23,7 +23,7 @@ namespace ActionGame
 		ValBarControl m_ExpBarControl;
 
 		// Use this for initialization
-		void Start () 
+		public void Init() 
 		{
 			m_NameText = gameObject.transform.FindChild("NameText").GetComponent<Text>();
 			m_LevelText = gameObject.transform.FindChild("LevelText").GetComponent<Text>();
@@ -34,6 +34,9 @@ namespace ActionGame
 			m_AtkMagText = gameObject.transform.FindChild("AtkMagText").GetComponent<Text>();
 			m_DefMagText = gameObject.transform.FindChild("DefMagText").GetComponent<Text>();
 			m_ExpBarControl = gameObject.transform.FindChild("ExpBar").GetComponent<ValBarControl>();
+
+			m_Data = PlayingManager.Inst.Player.Data;
+			m_ExpBarControl.Init();
 		}
 		
 		public void RefreshData()
@@ -49,7 +52,7 @@ namespace ActionGame
 			m_AtkMagText.text = "魔法攻击: " + m_Data.attrib.atkMag;
 			m_DefMagText.text = "魔法防御: " + m_Data.attrib.defMag;
 			m_ExpBarControl.OnValueChange( m_Data.levelData.exp / m_Data.levelData.levelUpExp,
-			                             m_Data.levelData.exp + "/" + m_Data.levelData.levelUpExp );
+			                             m_Data.levelData.exp.ToString() + "/" + m_Data.levelData.levelUpExp.ToString() );
 		}
 	}
 }

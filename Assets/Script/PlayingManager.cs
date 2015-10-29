@@ -28,6 +28,7 @@ namespace ActionGame
 		void Start () 
 		{
 			m_Player = GameObject.FindGameObjectWithTag("Player").GetComponent<PlayerControl>();
+			m_Player.Init();
 			m_AttribPanel = GameObject.Find("Canvas/AttribPanel").GetComponent<AttributePanel>();
 			Inst = this;
 		}

@@ -4,18 +4,21 @@
 /// </summary>
 
 using UnityEngine;
+using UnityEngine.UI;
 using System.Collections;
 
 namespace ActionGame
 {
 	public class StatePanel : MonoBehaviour {
 		bool m_ActiveFlag = false;
-		StateContent m_StateContent = null;
+		public StateContent m_StateContent = null;
 
-		// Use this for initialization
-		void Start () 
+		void Start()
 		{
-			m_StateContent = GameObject.FindGameObjectWithTag("UI_StateContent").GetComponent<StateContent>();
+			Button stateBtn = GameObject.FindGameObjectWithTag("UI_StateBtn").GetComponent<Button>();
+			stateBtn.onClick.AddListener(ActiveByCurrentState);
+			m_StateContent.Init();
+
 			gameObject.SetActive(false);
 		}
 
@@ -28,10 +31,16 @@ namespace ActionGame
 			gameObject.SetActive( m_ActiveFlag );
 
 			// 刷新状态信息的显示数据
-			RefreshStateData();
+			if( m_ActiveFlag )
+			{
+				_RefreshStateData();
+			}
 		}
 
-		void RefreshStateData()
+		/// <summary>
+		/// 刷新面板的数据
+		/// </summary>
+		void _RefreshStateData()
 		{
 			m_StateContent.RefreshData();
 		}

@@ -77,7 +77,7 @@ namespace ActionGame
 			// 将轴距清空
 			m_CurAxis.Set( 0.0f, 0.0f );
 
-	#if UNITY_EDITOR
+#if UNITY_EDITOR
 			// 编辑器内直接使用键盘按键进行移动
 			// 求出轴距
 			m_CurAxis.x = Input.GetAxis( "Horizontal" ) / 2;
@@ -85,7 +85,7 @@ namespace ActionGame
 				
 			// 根据方向适配精灵
 			SetSpriteAndDirByAxis();
-	#elif UNITY_ANDROID || UNITY_IOS
+#elif UNITY_ANDROID || UNITY_IOS
 			// 持续按下
 			if(m_IsTouch && Input.touchCount > 0)
 			{
@@ -99,7 +99,7 @@ namespace ActionGame
 				// 根据方向适配精灵
 				SetSpriteAndDirByAxis();
 			}
-	#endif
+#endif
 		}
 
 		public void OnPointerEnter(PointerEventData eventData)

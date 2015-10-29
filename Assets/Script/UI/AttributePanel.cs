@@ -20,7 +20,7 @@ namespace ActionGame
 			m_MpBar = gameObject.transform.FindChild("MpBar").gameObject;
 			m_AttribExpBar = gameObject.transform.FindChild("AttribExpBar").gameObject;
 
-			m_PlayerData = PlayingManager.Inst.Player.Data;
+			//m_PlayerData = PlayingManager.Inst.Player.Data;
 			//OnHpBarChange(m_PlayerData.attrib.hp/m_PlayerData.attrib.maxHp,
 			//              "" );
 		}
