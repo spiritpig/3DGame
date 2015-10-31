@@ -41,7 +41,7 @@ namespace ActionGame
 					Destroy(go);
 				}
 			}
-			Application.LoadLevel(Global.g_MainScene);
+			Application.LoadLevel(Global.g_LoadingScene);
 		}
 		
 		public bool IsStartGame()

@@ -10,6 +10,7 @@ namespace ActionGame
 {
 	public class PlayerControl : MonoBehaviour {
 		Vector3 m_TempVec3, m_TempAnlge;
+		GameObject m_CurTarget = null;
 		Global.DIR m_Dir = Global.DIR.D_NONE;
 		AnimationManagerPlayer m_AnimationManager;
 
@@ -238,7 +239,7 @@ namespace ActionGame
 		}
 
 		/// <summary>
-		/// Determines whether this instance is dead.
+		/// 玩家是否死亡
 		/// </summary>
 		public bool IsDead()
 		{
@@ -256,6 +257,26 @@ namespace ActionGame
 			// 血条做出反应
 			PlayingManager.Inst.AttribPanel.OnHpBarChange( m_Data.attrib.hp / m_Data.attrib.maxHp,
 			               m_Data.attrib.hp.ToString() + "/" + m_Data.attrib.maxHp.ToString() );
+		}
+
+		/// <summary>
+		/// 处理攻击行为
+		/// 参数： 离玩家最近的怪物，由外部提供
+		/// </summary>
+		public void OnAttack(GameObject go)
+		{
+			if(go == null)
+			{
+				return;
+			}
+
+			if(m_CurTarget != null)
+			{
+				m_CurTarget.transform.localScale /= 2;
+			}
+
+			m_CurTarget = go;
+			m_CurTarget.transform.localScale *= 2;
 		}
 	}
 }

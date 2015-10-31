@@ -4,6 +4,7 @@
 /// </summary>
 
 using UnityEngine;
+using UnityEngine.UI;
 using System.Collections;
 
 namespace ActionGame
@@ -11,36 +12,40 @@ namespace ActionGame
 	public class PlayingManager : MonoBehaviour {
 		public static PlayingManager Inst;
 		private PlayerControl m_Player = null;
+		private EnemyManager m_EnemyManager = null;
 		public PlayerControl Player {
 			get { return m_Player; }
 		}
 		private AttributePanel m_AttribPanel;
 		public AttributePanel AttribPanel {
-			get {
-				return m_AttribPanel;
-			}
-			set {
-				m_AttribPanel = value;
-			}
+			get { return m_AttribPanel; }
 		}
 
 		// Use this for initialization
 		void Start () 
 		{
 			m_Player = GameObject.FindGameObjectWithTag("Player").GetComponent<PlayerControl>();
-			m_Player.Init();
+			m_EnemyManager = GameObject.FindGameObjectWithTag("EnemyManager").GetComponent<EnemyManager>();
 			m_AttribPanel = GameObject.Find("Canvas/AttribPanel").GetComponent<AttributePanel>();
+			Button atkBtn = GameObject.Find("Canvas/AttackBtn").GetComponent<Button>();
+			atkBtn.onClick.AddListener(ProcessAttack);
+
+			m_Player.Init();
+			m_EnemyManager.Init();
 			Inst = this;
 		}
 		
-		// Update is called once per frame
-		void Update () 
-		{
-		}
-
 		public bool IsGameOver()
 		{
 			return m_Player.IsDead();
+		}
+
+		/// <summary>
+		/// 处理攻击行为
+		/// </summary>
+		void ProcessAttack()
+		{
+			m_Player.OnAttack( m_EnemyManager.GetNearestEnemy(m_Player.transform.position) );
 		}
 	}
 }

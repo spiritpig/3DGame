@@ -25,6 +25,7 @@ namespace ActionGame
 		/// <summary>
 		/// Scene
 		/// </summary>
+		public const string g_LoadingScene = "loading";
 		public const string g_MainScene = "playing";
 
 		/// <summary>
