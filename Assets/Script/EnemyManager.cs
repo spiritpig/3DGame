@@ -24,12 +24,25 @@ namespace ActionGame
 
 		public EnemyControl GetNearestEnemy(Vector3 pos)
 		{
-			float disTemp, disMin;
-			EnemyControl nearestEnemy = m_EnemyList[0];
-			disMin = Vector3.Distance(pos, nearestEnemy.transform.position);;
-
-			for(int i=1; i<m_EnemyList.Count; ++i)
+			if(m_EnemyList.Count <= 0)
 			{
+				return null;
+			}
+
+			float disTemp, disMin = float.MaxValue;
+			EnemyControl nearestEnemy = null;
+
+			// 找到最近的怪物并返回
+			for(int i=0; i<m_EnemyList.Count; ++i)
+			{
+				// 死亡的怪物不参与运算
+				if(m_EnemyList[i].Data.state == EnemyControl.ENEMYSTATE.ES_DEATH ||
+				   m_EnemyList[i].Data.state == EnemyControl.ENEMYSTATE.ES_DEATH_END)
+				{
+					continue;
+				}
+
+				// 比较距离大小
 				disTemp = Vector3.Distance(pos, m_EnemyList[i].transform.position);
 				if(disTemp < disMin)
 				{

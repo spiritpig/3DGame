@@ -16,7 +16,9 @@ namespace ActionGame
 			ES_BACK_IDLE,		// 回到初始位置
 			ES_BODY_ROTATE,
 			ES_CHASE,
+			ES_PRE_ATTACK,		// 该状态用于叠加攻击时间
 			ES_ATTACK,
+			ES_BEATTACK,
 			ES_DEATH,
 			ES_DEATH_END
 		}
@@ -61,7 +63,8 @@ namespace ActionGame
 		Vector2 m_TempVec2;
 		ENEMYSTATE m_NextState;
 		float m_CurBreakTime = 0.0f, m_CurChaseTime = 0.0f, 
-				m_TempFloat = 0.0f, m_RotateSpeed = 10.0f;
+				m_TempFloat = 0.0f, m_RotateSpeed = 10.0f,
+				m_CurAtkTime = 0.0f;
 		GameObject m_SelectedPlane = null;
 		CharacterController m_Controller;
 		AnimationManagerEnemy m_AnimationManager;
@@ -91,6 +94,12 @@ namespace ActionGame
 					{
 						_OnChaseStart();
 					}
+
+					// 顺便计算剩余的攻击冷却时间
+					if(m_CurAtkTime > 0.0f)
+					{
+						m_CurAtkTime -= Time.deltaTime;
+					}
 				}
 				break;
 
@@ -102,6 +111,12 @@ namespace ActionGame
 					if(_IsBackCentr())
 					{
 						_OnIdle();
+					}
+
+					// 顺便计算剩余的攻击冷却时间
+					if(m_CurAtkTime > 0.0f)
+					{
+						m_CurAtkTime -= Time.deltaTime;
 					}
 				}
 				break;
@@ -119,6 +134,12 @@ namespace ActionGame
 					{
 						m_Data.state = m_NextState;
 					}
+
+					// 顺便计算剩余的攻击冷却时间
+					if(m_CurAtkTime > 0.0f)
+					{
+						m_CurAtkTime -= Time.deltaTime;
+					}
 				}
 				break;
 
@@ -135,8 +156,21 @@ namespace ActionGame
 					// 如果接近玩家了，则转换为攻击状态
 					if(!_IsOutOfAtkRange())
 					{
-						_OnAttack();
+						if(m_CurAtkTime < 0.0f)
+						{
+							_OnAttack();
+						}
+						else
+						{
+							_OnPreAttack();
+						}
 						break;
+					}
+
+					// 顺便计算剩余的攻击冷却时间
+					if(m_CurAtkTime > 0.0f)
+					{
+						m_CurAtkTime -= Time.deltaTime;
 					}
 
 					// 朝着 玩家移动
@@ -146,20 +180,42 @@ namespace ActionGame
 					transform.LookAt(PlayingManager.Inst.Player.transform.position);
 				}
 				break;
+			
+			case ENEMYSTATE.ES_PRE_ATTACK:
+				{
+					m_CurAtkTime -= Time.deltaTime;
+					if(m_CurAtkTime < 0.0f)
+					{
+						_OnAttack();
+					}
+				}
+				break;
 
 			case ENEMYSTATE.ES_ATTACK:
 				{
+					// 递减攻击时间
+					m_CurAtkTime -= Time.deltaTime;
+
 					if(_IsOutOfAtkRange())
 					{
 						_OnChaseStart();
 						break;
 					}
-
 					
 					// 当次攻击动画接近尾声，判定为攻击生效
 					if(m_AnimationManager.IsAttackEnd())
 					{
 						PlayingManager.Inst.Player.OnBeAttack(m_Data.attrib.atkPhy);
+					}
+				}
+				break;
+
+			case ENEMYSTATE.ES_BEATTACK:
+				{
+					if(!m_AnimationManager.IsPlaying())
+					{
+						// 既然被打了，必须打回去
+						_OnChaseStart();
 					}
 				}
 				break;
@@ -201,6 +257,7 @@ namespace ActionGame
 			m_Data.attrib.atkSp = 1.0f;
 			m_Data.attrib.movSp = Global.g_PlayerMoveSpeed;
 			m_Data.attrib.atkRange = 2.5f;
+			m_Data.attrib.gainExp = 60;
 		}
 
 		/// <summary>
@@ -283,7 +340,34 @@ namespace ActionGame
 		void _OnAttack()
 		{
 			m_Data.state = ENEMYSTATE.ES_ATTACK;
+			m_CurAtkTime = m_Data.attrib.atkSp;
 			m_AnimationManager.animationProcessor = m_AnimationManager.Attack;
+		}
+
+		/// <summary>
+		/// 若是攻击的冷却时间未到，则切换到该状态
+		/// </summary>
+		void _OnPreAttack()
+		{
+			m_Data.state = ENEMYSTATE.ES_PRE_ATTACK;
+			m_AnimationManager.animationProcessor = m_AnimationManager.Idle;
+		}
+
+		void _OnBeAttack()
+		{
+			m_Data.state = ENEMYSTATE.ES_BEATTACK;
+
+			m_AnimationManager.animationProcessor = null;
+			m_AnimationManager.TakeDamage();
+		}
+
+		void _OnDeath()
+		{
+			m_Data.state = ENEMYSTATE.ES_DEATH;
+			
+			// 死亡动画，只播放一次
+			m_AnimationManager.animationProcessor = null;
+			m_AnimationManager.Death();
 		}
 
 		/// <summary>
@@ -299,19 +383,22 @@ namespace ActionGame
 		/// <summary>
 		/// 处理被攻击的情况
 		/// </summary>
-		public void BeAttack(float val)
+		/// <returns>
+		/// 若本次攻击导致怪物死亡，则返回true，否则返回false
+		/// </returns>
+		public bool BeAttack(float val)
 		{
 			m_Data.attrib.hp -= val;
 			// 血量为0,已跪
 			if(m_Data.attrib.hp <= 0.0f)
 			{
 				m_Data.attrib.hp = 0.0f;
-				m_Data.state = ENEMYSTATE.ES_DEATH;
-
-				// 死亡动画，只播放一次
-				m_AnimationManager.animationProcessor = null;
-				m_AnimationManager.Death();
+				_OnDeath();
+				return true;
 			}
+
+			_OnBeAttack();
+			return false;
 		}
 
 		/// <summary>

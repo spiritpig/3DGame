@@ -18,7 +18,7 @@ namespace ActionGame
 			public AnimationClip Animation;
 			public float AnimatTime;
 		}
-		AnimatData m_Idle, m_Run, m_Attack, m_Death;
+		AnimatData m_Idle, m_Run, m_Attack, m_Death, m_TakeDamager;
 		bool m_IsAttacked = false;
 		
 		// Use this for initialization
@@ -59,6 +59,10 @@ namespace ActionGame
 			m_Death = new AnimatData();
 			m_Death.AnimatTime = Global.g_PlayerRunAnimatTime;
 			m_Death.Animation = m_AnimationComponent.GetClip( "Death" );
+
+			m_TakeDamager = new AnimatData();
+			m_TakeDamager.AnimatTime = Global.g_PlayerRunAnimatTime*0.75f;
+			m_TakeDamager.Animation = m_AnimationComponent.GetClip( "TakeDamage1" );
 		}
 		
 		/// <summary>
@@ -86,6 +90,12 @@ namespace ActionGame
 		{
 			m_AnimationComponent.Play( m_Death.Animation.name );
 			m_AnimationComponent[ m_Death.Animation.name ].speed = m_Death.AnimatTime;
+		}
+
+		public void TakeDamage()
+		{
+			m_AnimationComponent.Play( m_TakeDamager.Animation.name );
+			m_AnimationComponent[ m_TakeDamager.Animation.name ].speed = m_TakeDamager.AnimatTime;
 		}
 
 		public bool IsPlaying()

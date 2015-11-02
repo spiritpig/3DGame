@@ -1,6 +1,13 @@
 #!/bin/bash
 
+#
+#目前commit的message不支持带有空格的字符串.
+#所以，需要分隔两端字符串时
+#请用其他分隔符如-
+#
+
 git add ProjectSettings
+git add Assets/Resources/Effect
 git add Assets/Resources/Material
 git add Assets/Resources/Material.meta
 git add Assets/Resources/Prefab

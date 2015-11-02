@@ -45,6 +45,7 @@ namespace ActionGame
 			public float movSp;			// 移动速度
 			public float atkSp;			// 攻击速度
 			public float atkRange;		// 攻击范围
+			public int gainExp;			// 死亡后，能给予的EXP
 		}
 
 		// 方向

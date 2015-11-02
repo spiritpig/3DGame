@@ -10,11 +10,6 @@ namespace ActionGame
 {
 	public class MagicBallControl : MonoBehaviour { 
 		GameObject m_Target = null;
-		public GameObject Target {
-			get { return m_Target; }
-			set { m_Target = value; }
-		}
-
 		bool m_IsHitTarget = false;
 		public bool IsHitTarget {
 			get {
@@ -25,7 +20,7 @@ namespace ActionGame
 		Vector3 m_TempVec3;
 		float m_Speed = 20.0f;
 
-		void Update()
+		void FixedUpdate()
 		{
 			if(!m_IsHitTarget)
 			{
@@ -35,6 +30,13 @@ namespace ActionGame
 				
 				transform.position += m_TempVec3*m_Speed*Time.deltaTime;
 			}
+		}
+
+		public void Reset(Vector3 pos, EnemyControl Target)
+		{
+			m_Target = Target.gameObject;
+			transform.localPosition = pos;
+			m_IsHitTarget = false;
 		}
 
 		public void OnTriggerEnter(Collider colli)

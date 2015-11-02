@@ -51,7 +51,7 @@ namespace ActionGame
 			m_DefPhyText.text = "物理防御: " + m_Data.attrib.defPhy;
 			m_AtkMagText.text = "魔法攻击: " + m_Data.attrib.atkMag;
 			m_DefMagText.text = "魔法防御: " + m_Data.attrib.defMag;
-			m_ExpBarControl.OnValueChange( m_Data.levelData.exp / m_Data.levelData.levelUpExp,
+			m_ExpBarControl.OnValueChange( (float)m_Data.levelData.exp / m_Data.levelData.levelUpExp,
 			                             m_Data.levelData.exp.ToString() + "/" + m_Data.levelData.levelUpExp.ToString() );
 		}
 	}

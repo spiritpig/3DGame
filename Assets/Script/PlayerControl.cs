@@ -11,9 +11,10 @@ namespace ActionGame
 	public class PlayerControl : MonoBehaviour {
 		Vector3 m_TempVec3, m_FrontVec, m_TempAnlge, m_MagicOriginPos;
 		EnemyControl m_CurTarget = null;
-		public GameObject m_Magicball = null;
+		MagicBallControl m_Magicball = null;
+		ParticleSystem m_LevelUpEffect;
 		GameObject m_FrontObj = null;
-		float m_RotateSpeed = 6.0f;
+		float m_RotateSpeed = 10.0f, m_CurAtkTime = 0.0f;
 		Global.DIR m_Dir = Global.DIR.D_NONE;
 		AnimationManagerPlayer m_AnimationManager;
 
@@ -28,6 +29,7 @@ namespace ActionGame
 			PS_MOVE_TO_TARGET,
 			PS_PRE_ATTACK,
 			PS_ATTACK,
+			PS_LEVELUP,
 			PS_Death
 		}
 
@@ -43,7 +45,7 @@ namespace ActionGame
 			public int exp;				// 经验值
 			public int levelUpExp;		// 升级所需经验值
 
-			void LevelUp()
+			public void LevelUp()
 			{
 				if(exp >= levelUpExp)
 				{
@@ -72,8 +74,12 @@ namespace ActionGame
 		{
 			_InitData();
 
-			m_Magicball.SetActive(false);
-			m_MagicOriginPos = m_Magicball.transform.position;
+			m_Magicball = transform.FindChild("MagicBall").gameObject.GetComponent<MagicBallControl>();
+			m_Magicball.gameObject.SetActive(false);
+			m_MagicOriginPos = m_Magicball.transform.localPosition;
+
+			m_LevelUpEffect = transform.FindChild("LevelUpEffect").gameObject.GetComponent<ParticleSystem>();
+			m_LevelUpEffect.gameObject.SetActive(false);
 
 			m_FrontObj = transform.FindChild("FrontObj").gameObject;
 
@@ -93,6 +99,11 @@ namespace ActionGame
 			case PLAYER_STATE.PS_IDLE:
 				{
 					m_AnimationManager.animationProcessor = m_AnimationManager.Idle;
+
+					if(m_CurAtkTime >= 0.0f)
+					{
+						m_CurAtkTime -= Time.deltaTime;
+					}
 				}
 				break;
 
@@ -100,6 +111,11 @@ namespace ActionGame
 				{
 					_DirProcess();
 					m_AnimationManager.animationProcessor = m_AnimationManager.Walk;
+
+					if(m_CurAtkTime >= 0.0f)
+					{
+						m_CurAtkTime -= Time.deltaTime;
+					}
 				}
 				break;
 
@@ -151,29 +167,54 @@ namespace ActionGame
 
 			case PLAYER_STATE.PS_PRE_ATTACK:
 				{
+					m_CurAtkTime -= Time.deltaTime;
+
 					// 攻击动画播放完成后，释放魔法球
 					if(!m_AnimationManager.IsAttack1End())
 					{
 						m_Data.state = PLAYER_STATE.PS_ATTACK;
-						m_Magicball.SetActive(true);
-						m_Magicball.transform.position = m_MagicOriginPos;
-						m_Magicball.GetComponent<MagicBallControl>().Target = m_CurTarget.gameObject;
+						m_Magicball.gameObject.SetActive(true);
+						m_Magicball.Reset(m_MagicOriginPos, m_CurTarget);
 					}
 				}
 				break;
 
 			case PLAYER_STATE.PS_ATTACK:
 				{
+					m_CurAtkTime -= Time.deltaTime;
+
 					// 此处交由MagicBall自行完成,移动。
-					// 玩家只需判断是否碰到即可
+					// 玩家只需判断目标是否死亡
+					if(m_CurTarget.Data.state == EnemyControl.ENEMYSTATE.ES_DEATH)
+					{
+						_OnAddExp();
+
+						m_Magicball.gameObject.SetActive(false);
+						_OnIdle();
+						break;
+					}
+
+					// 以及目标是否被击中
 					if(m_Magicball.GetComponent<MagicBallControl>().IsHitTarget)
                     {
-						m_CurTarget.BeAttack(m_Data.attrib.atkPhy);
-						m_Magicball.SetActive(false);
+						// 当目标死亡了，经验加上去
+						if(m_CurTarget.BeAttack(m_Data.attrib.atkPhy))
+						{
+							_OnAddExp();
+						}
 
-						m_Data.state = PLAYER_STATE.PS_IDLE;
-						m_AnimationManager.animationProcessor = m_AnimationManager.Idle;
+						m_Magicball.gameObject.SetActive(false);
+						_OnIdle();
 						break;
+					}
+				}
+				break;
+
+			case PLAYER_STATE.PS_LEVELUP:
+				{
+					if(!m_LevelUpEffect.isPlaying)
+					{
+					_OnIdle();
 					}
 				}
 				break;
@@ -194,9 +235,9 @@ namespace ActionGame
 			m_Data.attrib.atkMag = 40.0f;
 			m_Data.attrib.defPhy = 20.0f;
 			m_Data.attrib.defMag = 40.0f;
-			m_Data.attrib.atkSp = 1.0f;
+			m_Data.attrib.atkSp = 1.2f;
 			m_Data.attrib.movSp = Global.g_PlayerMoveSpeed;
-			m_Data.attrib.atkRange = 20.0f;
+			m_Data.attrib.atkRange = 10.0f;
 
 			m_Data.levelData = new LevelData();
 			m_Data.levelData.level = 1;
@@ -349,6 +390,32 @@ namespace ActionGame
 		}
 
 		/// <summary>
+		/// 
+		/// </summary>
+		void _OnAddExp()
+		{
+			m_Data.levelData.exp += m_CurTarget.Data.attrib.gainExp;
+			if(m_Data.levelData.exp >= m_Data.levelData.levelUpExp)
+			{
+				m_Data.levelData.LevelUp();
+
+				m_Data.state = PLAYER_STATE.PS_LEVELUP;
+				m_LevelUpEffect.gameObject.SetActive(true);
+				m_LevelUpEffect.playbackSpeed = 2.0f;
+				m_LevelUpEffect.Play(true);
+			}
+		}
+
+		/// <summary>
+		/// 处理玩家回到初始状态的情况
+		/// </summary>
+		void _OnIdle()
+		{
+			m_Data.state = PLAYER_STATE.PS_IDLE;
+			m_AnimationManager.animationProcessor = m_AnimationManager.Idle;
+		}
+
+		/// <summary>
 		/// 玩家是否死亡
 		/// </summary>
 		public bool IsDeath()
@@ -383,8 +450,17 @@ namespace ActionGame
 			return val > 0;
 		}
 
+		/// <summary>
+		/// 判断是否可以开始攻击
+		/// </summary>
 		public bool CanStartAttack()
 		{
+			// 攻击的CD时间未到，再等会
+			if(m_CurAtkTime > 0.0f)
+			{
+				return false;
+			}
+
 			if( m_Data.state == PLAYER_STATE.PS_IDLE ||
 			   m_Data.state == PLAYER_STATE.PS_WALK )
 			{
@@ -425,6 +501,7 @@ namespace ActionGame
 			m_CurTarget = Enemy;
 			m_CurTarget.BeSelected();
 			m_Data.state = PLAYER_STATE.PS_ROTATE_TO_TARGET;
+			m_CurAtkTime = m_Data.attrib.atkSp;
 			m_AnimationManager.animationProcessor = m_AnimationManager.Walk;
 		}
 	}
