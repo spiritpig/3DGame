@@ -1,5 +1,8 @@
 #!/bin/bash
 
+git add ProjectSettings
+git add Assets/Resources/Material
+git add Assets/Resources/Material.meta
 git add Assets/Resources/Prefab
 git add Assets/Resources/Prefab.meta
 git add Assets/Resources/Sprite

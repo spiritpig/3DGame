@@ -4,6 +4,7 @@
 /// </summary>
 
 using UnityEngine;
+using UnityEngine.UI;
 using System.Collections;
 
 namespace ActionGame
@@ -14,6 +15,11 @@ namespace ActionGame
 		EnemyControl m_Enemy;
 		Vector3 m_CurPos, m_Offset, m_Size;
 		GameObject m_HudObj;
+		public GameObject HudObj {
+			get {
+				return m_HudObj;
+			}
+		}
 
 		// Use this for initialization
 		void Start () 
@@ -37,6 +43,7 @@ namespace ActionGame
 		{
 			m_CurPos = Camera.main.WorldToScreenPoint(m_FollowObj.transform.position + m_Offset);
 			m_HudObj.transform.position = m_CurPos;
+			m_HudObj.GetComponent<ValBarControl>().OnValueChange(m_Enemy.Data.attrib.hp/m_Enemy.Data.attrib.maxHp, "");
 		}
 	}
 }

@@ -37,7 +37,7 @@ namespace ActionGame
 		
 		public bool IsGameOver()
 		{
-			return m_Player.IsDead();
+			return m_Player.IsDeath();
 		}
 
 		/// <summary>
@@ -45,7 +45,10 @@ namespace ActionGame
 		/// </summary>
 		void ProcessAttack()
 		{
-			m_Player.OnAttack( m_EnemyManager.GetNearestEnemy(m_Player.transform.position) );
+			if(m_Player.CanStartAttack())
+			{
+				m_Player.OnAttack( m_EnemyManager.GetNearestEnemy(m_Player.transform.position) );
+			}
 		}
 	}
 }

@@ -12,12 +12,13 @@ namespace ActionGame
 
 		public enum ENEMYSTATE
 		{
-			ET_IDLE,
-			ET_BACK_IDLE,		// 回到初始位置
-			ET_BODY_ROTATE,
-			ET_CHASE,
-			ET_ATTACK,
-			ET_DEATH
+			ES_IDLE,
+			ES_BACK_IDLE,		// 回到初始位置
+			ES_BODY_ROTATE,
+			ES_CHASE,
+			ES_ATTACK,
+			ES_DEATH,
+			ES_DEATH_END
 		}
 
 		public enum ENEMYTYPE
@@ -61,6 +62,7 @@ namespace ActionGame
 		ENEMYSTATE m_NextState;
 		float m_CurBreakTime = 0.0f, m_CurChaseTime = 0.0f, 
 				m_TempFloat = 0.0f, m_RotateSpeed = 10.0f;
+		GameObject m_SelectedPlane = null;
 		CharacterController m_Controller;
 		AnimationManagerEnemy m_AnimationManager;
 
@@ -69,9 +71,11 @@ namespace ActionGame
 		{
 			m_Controller = GetComponent<CharacterController>();
 			m_AnimationManager = gameObject.GetComponent<AnimationManagerEnemy>();
-			m_NextState = ENEMYSTATE.ET_IDLE;
+			m_NextState = ENEMYSTATE.ES_IDLE;
 			m_TempVec3 = new Vector3();
 			m_Dir = new Vector3();
+			m_SelectedPlane = transform.FindChild("SelectedPlane").gameObject;
+			m_SelectedPlane.SetActive(false);
 
 			_InitData();
 		}
@@ -81,7 +85,7 @@ namespace ActionGame
 		{
 			switch( m_Data.state )
 			{
-			case ENEMYSTATE.ET_IDLE:
+			case ENEMYSTATE.ES_IDLE:
 				{
 					if(_IsPlayerInRange())
 					{
@@ -90,7 +94,7 @@ namespace ActionGame
 				}
 				break;
 
-			case ENEMYSTATE.ET_BACK_IDLE:
+			case ENEMYSTATE.ES_BACK_IDLE:
 				{
 					m_Controller.SimpleMove(m_Dir*m_Data.attrib.movSp);
 
@@ -102,7 +106,7 @@ namespace ActionGame
 				}
 				break;
 
-			case ENEMYSTATE.ET_BODY_ROTATE:
+			case ENEMYSTATE.ES_BODY_ROTATE:
 				{
 					// 继续转头
 					Quaternion rotate = Quaternion.LookRotation( m_TempVec3 );
@@ -119,7 +123,7 @@ namespace ActionGame
 				break;
 
 			// 发现玩家了，往死里追
-			case ENEMYSTATE.ET_CHASE:
+			case ENEMYSTATE.ES_CHASE:
 				{
 					m_CurChaseTime -= Time.deltaTime;
 					if(m_CurChaseTime <= 0.0f)
@@ -143,7 +147,7 @@ namespace ActionGame
 				}
 				break;
 
-			case ENEMYSTATE.ET_ATTACK:
+			case ENEMYSTATE.ES_ATTACK:
 				{
 					if(_IsOutOfAtkRange())
 					{
@@ -159,13 +163,27 @@ namespace ActionGame
 					}
 				}
 				break;
+
+			case ENEMYSTATE.ES_DEATH:
+				{
+					if(!m_AnimationManager.IsPlaying())
+					{
+						m_Data.state = ENEMYSTATE.ES_DEATH_END;
+					}
+				}
+				break;
 			}
+		}
+
+		void OnDestroy()
+		{
+			Destroy(gameObject.GetComponent<HudControl>().HudObj);
 		}
 
 		void _InitData()
 		{
 			m_Data.type = ENEMYTYPE.ET_WOLFMAN;
-			m_Data.state = ENEMYSTATE.ET_IDLE;
+			m_Data.state = ENEMYSTATE.ES_IDLE;
 			m_Data.searchData.centrPoint = new Vector3();
 			m_Data.searchData.centrPoint = transform.position;
 			m_Data.searchData.breakTime = new Vector3(0.5f, 3.0f);
@@ -233,8 +251,8 @@ namespace ActionGame
 		void _OnIdle()
 		{
 			// 切换到静止态动画
-			m_Data.state = ENEMYSTATE.ET_IDLE;
-			m_AnimationManager.m_CurAnimationProcessor = m_AnimationManager.Idle;
+			m_Data.state = ENEMYSTATE.ES_IDLE;
+			m_AnimationManager.animationProcessor = m_AnimationManager.Idle;
 		}
 
 		/// <summary>
@@ -242,13 +260,13 @@ namespace ActionGame
 		/// </summary>
 		void _OnChaseStart()
 		{
-			_PrepareBodyRotate(ENEMYSTATE.ET_CHASE);
+			_PrepareBodyRotate(ENEMYSTATE.ES_CHASE);
 			m_TempVec3 = PlayingManager.Inst.Player.transform.position - transform.position;
 			m_Dir = m_TempVec3;
 			m_Dir.Normalize();
 			m_CurChaseTime = m_Data.chaseData.maxTime;
 
-			m_AnimationManager.m_CurAnimationProcessor = m_AnimationManager.Walk;
+			m_AnimationManager.animationProcessor = m_AnimationManager.Walk;
 		}
 
 		/// <summary>
@@ -256,7 +274,7 @@ namespace ActionGame
 		/// </summary>
 		void _OnChaseEnd()
 		{
-			_PrepareBodyRotate(ENEMYSTATE.ET_BACK_IDLE);
+			_PrepareBodyRotate(ENEMYSTATE.ES_BACK_IDLE);
 			m_TempVec3 = m_Data.searchData.centrPoint - transform.position;
 			m_Dir = m_TempVec3;
 			m_Dir.Normalize();
@@ -264,8 +282,8 @@ namespace ActionGame
 
 		void _OnAttack()
 		{
-			m_Data.state = ENEMYSTATE.ET_ATTACK;
-			m_AnimationManager.m_CurAnimationProcessor = m_AnimationManager.Attack;
+			m_Data.state = ENEMYSTATE.ES_ATTACK;
+			m_AnimationManager.animationProcessor = m_AnimationManager.Attack;
 		}
 
 		/// <summary>
@@ -274,8 +292,46 @@ namespace ActionGame
 		/// <param name="nextState">Next state.</param>
 		void _PrepareBodyRotate(ENEMYSTATE nextState)
 		{
-			m_Data.state = ENEMYSTATE.ET_BODY_ROTATE;
+			m_Data.state = ENEMYSTATE.ES_BODY_ROTATE;
 			m_NextState = nextState;
+		}
+
+		/// <summary>
+		/// 处理被攻击的情况
+		/// </summary>
+		public void BeAttack(float val)
+		{
+			m_Data.attrib.hp -= val;
+			// 血量为0,已跪
+			if(m_Data.attrib.hp <= 0.0f)
+			{
+				m_Data.attrib.hp = 0.0f;
+				m_Data.state = ENEMYSTATE.ES_DEATH;
+
+				// 死亡动画，只播放一次
+				m_AnimationManager.animationProcessor = null;
+				m_AnimationManager.Death();
+			}
+		}
+
+		/// <summary>
+		/// 处理被攻击的情况
+		/// </summary>
+		public void BeSelected()
+		{
+			gameObject.tag = "Target";
+			m_SelectedPlane.SetActive(true);
+			m_SelectedPlane.GetComponent<SelectedPlaneControl>().OnSelected();
+		}
+
+		/// <summary>
+		/// 处理当玩家的目标从该怪物切换到其他怪物的情况
+		/// </summary>
+		public void AfterBeSelected()
+		{
+			gameObject.tag = "Enemy";
+			m_SelectedPlane.SetActive(false);
+			m_SelectedPlane.GetComponent<SelectedPlaneControl>().OnFree();
 		}
 	}
 }

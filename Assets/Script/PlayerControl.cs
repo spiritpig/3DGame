@@ -9,8 +9,11 @@ using System.Collections;
 namespace ActionGame
 {
 	public class PlayerControl : MonoBehaviour {
-		Vector3 m_TempVec3, m_TempAnlge;
-		GameObject m_CurTarget = null;
+		Vector3 m_TempVec3, m_FrontVec, m_TempAnlge, m_MagicOriginPos;
+		EnemyControl m_CurTarget = null;
+		public GameObject m_Magicball = null;
+		GameObject m_FrontObj = null;
+		float m_RotateSpeed = 6.0f;
 		Global.DIR m_Dir = Global.DIR.D_NONE;
 		AnimationManagerPlayer m_AnimationManager;
 
@@ -21,8 +24,11 @@ namespace ActionGame
 		{
 			PS_IDLE,
 			PS_WALK,
-			PS_RUN,
-			PS_DEAD
+			PS_ROTATE_TO_TARGET,
+			PS_MOVE_TO_TARGET,
+			PS_PRE_ATTACK,
+			PS_ATTACK,
+			PS_Death
 		}
 
 		// 类型
@@ -66,6 +72,11 @@ namespace ActionGame
 		{
 			_InitData();
 
+			m_Magicball.SetActive(false);
+			m_MagicOriginPos = m_Magicball.transform.position;
+
+			m_FrontObj = transform.FindChild("FrontObj").gameObject;
+
 			m_TempVec3 = new Vector3();
 			m_TempAnlge = new Vector3();
 			m_AnimationManager = gameObject.GetComponent<AnimationManagerPlayer>();
@@ -74,18 +85,98 @@ namespace ActionGame
 		// Update is called once per frame
 		void Update () 
 		{
-			CalcCurDir();
+			_CalcCurDir();
+			_CalcCurState();
 
-			if( m_Dir != Global.DIR.D_NONE )
+			switch(m_Data.state)
 			{
-				_DirProcess();
-				m_AnimationManager.m_CurAnimationProcessor = m_AnimationManager.Run;
-				m_Data.state = PLAYER_STATE.PS_RUN;
-			}
-			else
-			{
-				m_AnimationManager.m_CurAnimationProcessor = m_AnimationManager.Idle;
-				m_Data.state = PLAYER_STATE.PS_IDLE;
+			case PLAYER_STATE.PS_IDLE:
+				{
+					m_AnimationManager.animationProcessor = m_AnimationManager.Idle;
+				}
+				break;
+
+			case PLAYER_STATE.PS_WALK:
+				{
+					_DirProcess();
+					m_AnimationManager.animationProcessor = m_AnimationManager.Walk;
+				}
+				break;
+
+			case PLAYER_STATE.PS_ROTATE_TO_TARGET:
+				{
+					m_TempVec3 = m_CurTarget.transform.position - transform.position;
+					Quaternion lookRotate = Quaternion.LookRotation(m_TempVec3);
+
+					// 将玩家转向目标
+					if(Quaternion.Angle( transform.rotation, lookRotate ) > 1.0f)
+					{
+						transform.rotation = Quaternion.Slerp( transform.rotation, lookRotate, 
+					                                      		m_RotateSpeed*Time.deltaTime );
+					}
+					else
+					{
+						if(IsTargetInAtkRange())
+						{
+							m_Data.state = PLAYER_STATE.PS_PRE_ATTACK;
+							m_AnimationManager.OnAttack();
+							m_AnimationManager.animationProcessor = null;
+						}
+						else
+						{
+							m_Data.state = PLAYER_STATE.PS_MOVE_TO_TARGET;
+						}
+					}
+				}
+				break;
+
+			case PLAYER_STATE.PS_MOVE_TO_TARGET:
+				{
+					// 若是目标处于攻击范围内，开始攻击
+					// 若是没有，则先移动到攻击范围内
+					if(IsTargetInAtkRange())
+					{
+						m_Data.state = PLAYER_STATE.PS_PRE_ATTACK;
+						m_AnimationManager.OnAttack();
+						m_AnimationManager.animationProcessor = null;
+					}
+					else
+					{
+						m_TempVec3 = m_CurTarget.transform.position - transform.position;
+						m_TempVec3.Normalize();
+						transform.position += m_TempVec3 *(m_Data.attrib.movSp*Time.deltaTime);
+					}
+				}
+				break;
+
+			case PLAYER_STATE.PS_PRE_ATTACK:
+				{
+					// 攻击动画播放完成后，释放魔法球
+					if(!m_AnimationManager.IsAttack1End())
+					{
+						m_Data.state = PLAYER_STATE.PS_ATTACK;
+						m_Magicball.SetActive(true);
+						m_Magicball.transform.position = m_MagicOriginPos;
+						m_Magicball.GetComponent<MagicBallControl>().Target = m_CurTarget.gameObject;
+					}
+				}
+				break;
+
+			case PLAYER_STATE.PS_ATTACK:
+				{
+					// 此处交由MagicBall自行完成,移动。
+					// 玩家只需判断是否碰到即可
+					if(m_Magicball.GetComponent<MagicBallControl>().IsHitTarget)
+                    {
+						m_CurTarget.BeAttack(m_Data.attrib.atkPhy);
+						m_Magicball.SetActive(false);
+
+						m_Data.state = PLAYER_STATE.PS_IDLE;
+						m_AnimationManager.animationProcessor = m_AnimationManager.Idle;
+						break;
+					}
+				}
+				break;
 			}
 		}
 
@@ -105,7 +196,7 @@ namespace ActionGame
 			m_Data.attrib.defMag = 40.0f;
 			m_Data.attrib.atkSp = 1.0f;
 			m_Data.attrib.movSp = Global.g_PlayerMoveSpeed;
-			m_Data.attrib.atkRange = 5.0f;
+			m_Data.attrib.atkRange = 20.0f;
 
 			m_Data.levelData = new LevelData();
 			m_Data.levelData.level = 1;
@@ -182,7 +273,7 @@ namespace ActionGame
 		/// <summary>
 		/// 根据当前的轴距确定角色的行进方向
 		/// </summary>
-		void CalcCurDir()
+		void _CalcCurDir()
 		{
 			float vertAxis = ETCInput.GetAxis("Vertical");
 			float horiAxis = ETCInput.GetAxis("Horizontal");
@@ -239,11 +330,67 @@ namespace ActionGame
 		}
 
 		/// <summary>
+		/// 计算当前的状态
+		/// </summary>
+		void _CalcCurState()
+		{
+			if(m_Data.state == PLAYER_STATE.PS_WALK ||
+			   m_Data.state == PLAYER_STATE.PS_IDLE)
+			{
+				if(m_Dir == Global.DIR.D_NONE)
+				{
+					m_Data.state = PLAYER_STATE.PS_IDLE;
+				}
+				else
+				{
+					m_Data.state = PLAYER_STATE.PS_WALK;
+				}
+			}
+		}
+
+		/// <summary>
 		/// 玩家是否死亡
 		/// </summary>
-		public bool IsDead()
+		public bool IsDeath()
 		{
-			return m_Data.state == PLAYER_STATE.PS_DEAD;
+			return m_Data.state == PLAYER_STATE.PS_Death;
+		}
+
+		/// <summary>
+		/// 判断目标是否在玩家的共计范围内
+		/// </summary>
+		public bool IsTargetInAtkRange()
+		{
+			float m_Dist = Vector3.Distance(transform.position, m_CurTarget.transform.position);
+			return m_Dist <= m_Data.attrib.atkRange;
+		}
+
+		/// <summary>
+		/// 判断目标是否在玩家面朝方向的正面
+		/// 备注： 预留，未来可能有用
+		/// </summary>
+		public bool IsTargetInFront()
+		{
+			if(m_CurTarget)
+			{
+				return false;
+			}
+
+			m_TempVec3 = m_CurTarget.transform.position - transform.position;
+			m_FrontVec = m_FrontObj.transform.position - transform.position;
+			float val = Vector3.Dot(m_FrontVec, m_TempVec3);
+
+			return val > 0;
+		}
+
+		public bool CanStartAttack()
+		{
+			if( m_Data.state == PLAYER_STATE.PS_IDLE ||
+			   m_Data.state == PLAYER_STATE.PS_WALK )
+			{
+				return true;
+			}
+			return false;
 		}
 
 		public void OnBeAttack(float atkVal)
@@ -263,20 +410,22 @@ namespace ActionGame
 		/// 处理攻击行为
 		/// 参数： 离玩家最近的怪物，由外部提供
 		/// </summary>
-		public void OnAttack(GameObject go)
+		public void OnAttack(EnemyControl Enemy)
 		{
-			if(go == null)
+			if(Enemy == null)
 			{
 				return;
 			}
 
 			if(m_CurTarget != null)
 			{
-				m_CurTarget.transform.localScale /= 2;
+				m_CurTarget.AfterBeSelected();
 			}
 
-			m_CurTarget = go;
-			m_CurTarget.transform.localScale *= 2;
+			m_CurTarget = Enemy;
+			m_CurTarget.BeSelected();
+			m_Data.state = PLAYER_STATE.PS_ROTATE_TO_TARGET;
+			m_AnimationManager.animationProcessor = m_AnimationManager.Walk;
 		}
 	}
 }

@@ -11,14 +11,14 @@ namespace ActionGame
 	public class AnimationManagerEnemy : MonoBehaviour {
 		
 		public delegate void AnimationProcessor();
-		public AnimationProcessor m_CurAnimationProcessor = null;
+		public AnimationProcessor animationProcessor = null;
 		Animation m_AnimationComponent;
 		struct AnimatData
 		{
 			public AnimationClip Animation;
 			public float AnimatTime;
 		}
-		AnimatData m_Idle, m_Run, m_Attack;
+		AnimatData m_Idle, m_Run, m_Attack, m_Death;
 		bool m_IsAttacked = false;
 		
 		// Use this for initialization
@@ -33,9 +33,9 @@ namespace ActionGame
 		void Update () 
 		{
 			// 有动作的时候，执行该动作
-			if( m_CurAnimationProcessor != null )
+			if( animationProcessor != null )
 			{
-				m_CurAnimationProcessor();
+				animationProcessor();
 			}
 		}
 		
@@ -55,6 +55,10 @@ namespace ActionGame
 			m_Attack = new AnimatData();
 			m_Attack.AnimatTime = Global.g_PlayerRunAnimatTime;
 			m_Attack.Animation = m_AnimationComponent.GetClip( "Attack1" );
+
+			m_Death = new AnimatData();
+			m_Death.AnimatTime = Global.g_PlayerRunAnimatTime;
+			m_Death.Animation = m_AnimationComponent.GetClip( "Death" );
 		}
 		
 		/// <summary>
@@ -78,12 +82,23 @@ namespace ActionGame
 			m_AnimationComponent[ m_Attack.Animation.name ].speed = m_Attack.AnimatTime;
 		}
 
+		public void Death()
+		{
+			m_AnimationComponent.Play( m_Death.Animation.name );
+			m_AnimationComponent[ m_Death.Animation.name ].speed = m_Death.AnimatTime;
+		}
+
+		public bool IsPlaying()
+		{
+			return m_AnimationComponent.isPlaying;
+		}
+
 		/// <summary>
 		// 判断攻击是否结束
 		/// </summary>
 		public bool IsAttackEnd()
 		{
-			if(m_CurAnimationProcessor == Attack &&
+			if(animationProcessor == Attack &&
 			   !m_IsAttacked &&
 			   m_AnimationComponent[ m_Attack.Animation.name ].normalizedTime >= 0.9f)
 			{
