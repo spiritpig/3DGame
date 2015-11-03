@@ -13,6 +13,7 @@ namespace ActionGame
 		Scrollbar m_ScrollBar;
 		Image m_Content;
 		Text m_ValText;
+		public bool HasText = true;
 		public float initVal = 1.0f;
 
 		// Use this for initialization
@@ -40,7 +41,7 @@ namespace ActionGame
             m_Content.material.SetFloat("_MaskWidth", val);
 
 			// 字体字符串为空，则代表不需要设置valStr
-			if(valStr == "")
+			if(valStr == "" || !HasText)
 			{
 				return;
 			}

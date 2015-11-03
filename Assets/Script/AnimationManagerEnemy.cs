@@ -19,7 +19,6 @@ namespace ActionGame
 			public float AnimatTime;
 		}
 		AnimatData m_Idle, m_Run, m_Attack, m_Death, m_TakeDamager;
-		bool m_IsAttacked = false;
 		
 		// Use this for initialization
 		void Start () 
@@ -106,17 +105,13 @@ namespace ActionGame
 		/// <summary>
 		// 判断攻击是否结束
 		/// </summary>
-		public bool IsAttackEnd()
+		public bool IsAttack1End()
 		{
-			if(animationProcessor == Attack &&
-			   !m_IsAttacked &&
-			   m_AnimationComponent[ m_Attack.Animation.name ].normalizedTime >= 0.9f)
+			if((m_AnimationComponent.IsPlaying(m_Attack.Animation.name) &&
+			   m_AnimationComponent[ m_Attack.Animation.name ].normalizedTime >= 0.6f ))
 			{
-				Debug.Log( "BEAttack" );
-				m_IsAttacked = true;
 				return true;
 			}
-			m_IsAttacked = false;
 			return false;
 		}
 	}

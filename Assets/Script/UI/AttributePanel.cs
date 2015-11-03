@@ -20,24 +20,35 @@ namespace ActionGame
 			m_MpBar = gameObject.transform.FindChild("MpBar").gameObject;
 			m_AttribExpBar = gameObject.transform.FindChild("AttribExpBar").gameObject;
 
-			//m_PlayerData = PlayingManager.Inst.Player.Data;
-			//OnHpBarChange(m_PlayerData.attrib.hp/m_PlayerData.attrib.maxHp,
-			//              "" );
+			// 预更新一次人物状态栏
+			m_PlayerData = PlayingManager.Inst.Player.Data;
+			OnHpBarChange();
+			OnMpBarChange();
+			OnExpBarChange();
 		}
 
-		public void OnHpBarChange(float rate, string hpStr)
+		public void OnHpBarChange()
 		{
-			m_HpBar.GetComponent<ValBarControl>().OnValueChange(rate, hpStr);
+			m_PlayerData = PlayingManager.Inst.Player.Data;
+			m_HpBar.GetComponent<ValBarControl>().OnValueChange(
+				m_PlayerData.attrib.hp/m_PlayerData.attrib.maxHp, 
+				m_PlayerData.attrib.hp.ToString() + "/" + m_PlayerData.attrib.maxHp.ToString() );
 		}
 
-		public void OnMpBarChange(float rate, string mpStr)
+		public void OnMpBarChange()
 		{
-			m_MpBar.GetComponent<ValBarControl>().OnValueChange(rate, mpStr);
+			m_PlayerData = PlayingManager.Inst.Player.Data;
+			m_MpBar.GetComponent<ValBarControl>().OnValueChange(
+				m_PlayerData.attrib.eng/m_PlayerData.attrib.maxEng, 
+				m_PlayerData.attrib.eng.ToString() + "/" + m_PlayerData.attrib.maxEng.ToString() );
 		}
 
-		public void OnExpBarChange(float rate, string mpStr)
+		public void OnExpBarChange()
 		{
-			m_AttribExpBar.GetComponent<ValBarControl>().OnValueChange(rate, mpStr);
+			m_PlayerData = PlayingManager.Inst.Player.Data;
+			m_AttribExpBar.GetComponent<ValBarControl>().OnValueChange(
+				(float)m_PlayerData.levelData.exp/m_PlayerData.levelData.levelUpExp, 
+				m_PlayerData.levelData.exp.ToString() + "/" + m_PlayerData.levelData.levelUpExp.ToString() );
 		}
 	}
 }

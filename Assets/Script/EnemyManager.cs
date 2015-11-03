@@ -11,11 +11,17 @@ using System.Collections.Generic;
 namespace ActionGame
 {
 	public class EnemyManager : MonoBehaviour {
-		public List<EnemyControl> m_EnemyList;
+		List<EnemyControl> m_EnemyList;
+		public List<EnemyControl> EnemyList {
+			get {
+				return m_EnemyList;
+			}
+		}
 
 		// Use this for initialization
 		public void Init () 
 		{
+			m_EnemyList = new List<EnemyControl>();
 			foreach(GameObject go in GameObject.FindGameObjectsWithTag("Enemy"))
 			{
 				m_EnemyList.Add(go.GetComponent<EnemyControl>());

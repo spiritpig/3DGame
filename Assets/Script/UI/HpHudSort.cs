@@ -2,7 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 
-public class HudSort : MonoBehaviour {
+public class HpHudSort : MonoBehaviour {
 
 	List<Transform> m_ChildList;
 	// Use this for initialization

@@ -65,6 +65,7 @@ namespace ActionGame
 		float m_CurBreakTime = 0.0f, m_CurChaseTime = 0.0f, 
 				m_TempFloat = 0.0f, m_RotateSpeed = 10.0f,
 				m_CurAtkTime = 0.0f;
+		bool m_IsAttacked = false;
 		GameObject m_SelectedPlane = null;
 		CharacterController m_Controller;
 		AnimationManagerEnemy m_AnimationManager;
@@ -193,19 +194,25 @@ namespace ActionGame
 
 			case ENEMYSTATE.ES_ATTACK:
 				{
-					// 递减攻击时间
-					m_CurAtkTime -= Time.deltaTime;
-
 					if(_IsOutOfAtkRange())
 					{
 						_OnChaseStart();
 						break;
 					}
-					
+
 					// 当次攻击动画接近尾声，判定为攻击生效
-					if(m_AnimationManager.IsAttackEnd())
+					if(!m_IsAttacked &&
+				   		m_AnimationManager.IsAttack1End())
 					{
-						PlayingManager.Inst.Player.OnBeAttack(m_Data.attrib.atkPhy);
+						PlayingManager.Inst.Player.BeAttack(m_Data.attrib.atkPhy);
+						m_IsAttacked = true;
+					}
+
+					// 攻击动画结束了，再攻击一次
+					if(!m_AnimationManager.IsPlaying())
+					{
+						_OnPreAttack();
+						m_CurAtkTime = m_Data.attrib.atkSp;
 					}
 				}
 				break;
@@ -233,7 +240,7 @@ namespace ActionGame
 
 		void OnDestroy()
 		{
-			Destroy(gameObject.GetComponent<HudControl>().HudObj);
+			Destroy(gameObject.GetComponent<HpHudControl>().HudObj);
 		}
 
 		void _InitData()
@@ -254,9 +261,9 @@ namespace ActionGame
 			m_Data.attrib.atkMag = 40.0f;
 			m_Data.attrib.defPhy = 20.0f;
 			m_Data.attrib.defMag = 40.0f;
-			m_Data.attrib.atkSp = 1.0f;
+			m_Data.attrib.atkSp = 0.8f;
 			m_Data.attrib.movSp = Global.g_PlayerMoveSpeed;
-			m_Data.attrib.atkRange = 2.5f;
+			m_Data.attrib.atkRange = 3.0f;
 			m_Data.attrib.gainExp = 60;
 		}
 
@@ -340,8 +347,9 @@ namespace ActionGame
 		void _OnAttack()
 		{
 			m_Data.state = ENEMYSTATE.ES_ATTACK;
-			m_CurAtkTime = m_Data.attrib.atkSp;
-			m_AnimationManager.animationProcessor = m_AnimationManager.Attack;
+			m_AnimationManager.animationProcessor = null;
+			m_AnimationManager.Attack();
+			m_IsAttacked = false;
 		}
 
 		/// <summary>
@@ -398,6 +406,7 @@ namespace ActionGame
 			}
 
 			_OnBeAttack();
+			PlayingManager.Inst.DamageHudControl.UseDamageHud(transform, (int)val);
 			return false;
 		}
 

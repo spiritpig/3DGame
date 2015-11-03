@@ -18,12 +18,20 @@ namespace ActionGame
 		}
 
 		Vector3 m_TempVec3;
-		float m_Speed = 20.0f;
+		float m_Speed = 10.0f;
 
-		void FixedUpdate()
+		void Update()
 		{
 			if(!m_IsHitTarget)
 			{
+				// 通过距离判断是否打到
+				float dist = Vector3.Distance(m_Target.transform.position, transform.position);
+				if(dist <= 2.0f)
+				{
+					m_IsHitTarget = true;
+					return;
+				}
+
 				m_TempVec3 = m_Target.transform.position - transform.position;
 				m_TempVec3.y = 0.0f;
 				m_TempVec3.Normalize();
@@ -37,18 +45,6 @@ namespace ActionGame
 			m_Target = Target.gameObject;
 			transform.localPosition = pos;
 			m_IsHitTarget = false;
-		}
-
-		public void OnTriggerEnter(Collider colli)
-		{
-			if(colli.gameObject.Equals(m_Target))
-			{
-				m_IsHitTarget = true;
-			}
-			else
-			{
-				m_IsHitTarget = false;
-			}
 		}
 	}
 }

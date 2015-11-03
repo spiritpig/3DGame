@@ -7,10 +7,10 @@ using UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
 
+
 namespace ActionGame
 {
-	public class HudControl : MonoBehaviour {
-
+	public class HpHudControl : MonoBehaviour {
 		Transform m_FollowObj;
 		EnemyControl m_Enemy;
 		Vector3 m_CurPos, m_Offset, m_Size;
@@ -34,7 +34,7 @@ namespace ActionGame
 
 			GameObject go = Resources.Load("Prefab/UI/EnemyHpBar") as GameObject;
 			m_HudObj = Instantiate(go);
-			m_HudObj.transform.SetParent( GameObject.Find("HudCanvas").transform );
+			m_HudObj.transform.SetParent( GameObject.Find("HpHudCanvas").transform );
 			m_HudObj.transform.localScale = Vector3.one;
 		}
 		

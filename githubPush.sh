@@ -7,13 +7,20 @@
 #
 
 git add ProjectSettings
+git add Assets/Resources/Font
+git add Assets/Resources/Font.meta
+git add Assets/Resources/Mesh
+git add Assets/Resources/Mesh.meta
 git add Assets/Resources/Effect
+git add Assets/Resources/Effect.meta
 git add Assets/Resources/Material
 git add Assets/Resources/Material.meta
 git add Assets/Resources/Prefab
 git add Assets/Resources/Prefab.meta
 git add Assets/Resources/Sprite
 git add Assets/Resources/Sprite.meta
+git add Assets/Resources/order.txt
+git add Assets/Resources/order.txt.meta
 git add Assets/Scene
 git add Assets/Scene.meta
 git add Assets/Script

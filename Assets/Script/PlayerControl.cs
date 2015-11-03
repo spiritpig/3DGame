@@ -39,29 +39,34 @@ namespace ActionGame
 			PT_MAGE
 		}
 
-		public class LevelData
+		public struct LevelData
 		{
 			public int level;			// 当前等级
 			public int exp;				// 经验值
 			public int levelUpExp;		// 升级所需经验值
-
-			public void LevelUp()
-			{
-				if(exp >= levelUpExp)
-				{
-					level += 1;
-					levelUpExp = levelUpExp + levelUpExp*(level/10 + 1);
-				}
-			}
 		}
 
 		// 数据集合
-		public struct PlayerData
+		public class PlayerData
 		{
 			public PLAYER_TYPE type;
 			public PLAYER_STATE state;
 			public Global.Attribute attrib;
 			public LevelData levelData;
+
+			public void LevelUp()
+			{
+				levelData.level += 1;
+				levelData.levelUpExp = levelData.levelUpExp + levelData.levelUpExp*(levelData.level/10 + 1);
+				levelData.exp = 0;
+
+				attrib.hp += (float)((int)(100.0f*(1+Mathf.Log(levelData.level))));
+				attrib.maxHp = attrib.hp;
+				attrib.eng += (float)((int)(10.0f*(1+Mathf.Log(levelData.level))));
+				attrib.maxEng = attrib.eng;
+				attrib.atkMag += (float)((int)(attrib.atkMag/2*(Mathf.Log(levelData.level))));
+				attrib.atkPhy += (float)((int)(attrib.atkPhy/2 * 0.07f));
+			}
 		}
 		PlayerData m_Data;
 		public PlayerData Data {
@@ -223,9 +228,11 @@ namespace ActionGame
 
 		void _InitData()
 		{
+			m_Data = new PlayerData();
 			m_Data.type = PLAYER_TYPE.PT_MAGE;
 			m_Data.state = PLAYER_STATE.PS_IDLE;
 
+			// 属性数据
 			m_Data.attrib.charName = "Mage";
 			m_Data.attrib.hp = 100.0f;
 			m_Data.attrib.maxHp = 100.0f;
@@ -239,7 +246,7 @@ namespace ActionGame
 			m_Data.attrib.movSp = Global.g_PlayerMoveSpeed;
 			m_Data.attrib.atkRange = 10.0f;
 
-			m_Data.levelData = new LevelData();
+			// 等级数据
 			m_Data.levelData.level = 1;
 			m_Data.levelData.exp = 0;
 			m_Data.levelData.levelUpExp = 100;
@@ -395,15 +402,19 @@ namespace ActionGame
 		void _OnAddExp()
 		{
 			m_Data.levelData.exp += m_CurTarget.Data.attrib.gainExp;
+
+			// 若经验满了，则升级
 			if(m_Data.levelData.exp >= m_Data.levelData.levelUpExp)
 			{
-				m_Data.levelData.LevelUp();
+				m_Data.LevelUp();
 
 				m_Data.state = PLAYER_STATE.PS_LEVELUP;
 				m_LevelUpEffect.gameObject.SetActive(true);
-				m_LevelUpEffect.playbackSpeed = 2.0f;
 				m_LevelUpEffect.Play(true);
 			}
+
+			// 更新UI
+			PlayingManager.Inst.AttribPanel.OnExpBarChange();
 		}
 
 		/// <summary>
@@ -469,17 +480,20 @@ namespace ActionGame
 			return false;
 		}
 
-		public void OnBeAttack(float atkVal)
+		/// <summary>
+		/// 被攻击函数，减少血量
+		/// </summary>
+		public void BeAttack(float val)
 		{
-			m_Data.attrib.hp -= atkVal;
+			m_Data.attrib.hp -= val;
 			if(m_Data.attrib.hp < 0)
 			{
 				m_Data.attrib.hp = 0;
 			}
 
-			// 血条做出反应
-			PlayingManager.Inst.AttribPanel.OnHpBarChange( m_Data.attrib.hp / m_Data.attrib.maxHp,
-			               m_Data.attrib.hp.ToString() + "/" + m_Data.attrib.maxHp.ToString() );
+			// 更新UI
+			PlayingManager.Inst.AttribPanel.OnHpBarChange();
+			PlayingManager.Inst.DamageHudControl.UseDamageHud(transform, (int)val);
 		}
 
 		/// <summary>
