@@ -9,6 +9,11 @@ namespace ActionGame
 		Vector3 m_TempVec3, m_BaseRotate = new Vector3( 0.0f, 0.0f, -1.0f );
 		public float m_Distance = 3.0f;
 
+		public static bool m_IsShake = false;
+		int m_ShakeTimes = 8;
+		float m_Seg = 1.0f;
+		Vector3 m_ShakeDelta = new Vector3(0.0f, 0.2f, 0.0f);
+
 		// Use this for initialization
 		void Start () 
 		{
@@ -37,16 +42,36 @@ namespace ActionGame
 		// Update is called once per frame
 		void Update () 
 		{
-			// 计算当前 朝向向量
-			m_TempVec3 = m_BaseRotate*m_Distance;
-			m_TempVec3.y = m_Distance;
+			if(m_IsShake)
+			{
+				m_Camera.transform.position += m_ShakeDelta*m_Seg;
+				m_Seg = -m_Seg;
 
-			// 摄像机位置
-			m_Camera.transform.position = new Vector3(
+				--m_ShakeTimes;
+				if(m_ShakeTimes <= 0)
+				{
+					m_ShakeTimes = 8;
+					m_IsShake = false;
+				}
+			}
+			else
+			{
+				// 计算当前 朝向向量
+				m_TempVec3 = m_BaseRotate*m_Distance;
+				m_TempVec3.y = m_Distance;
+				
+				// 摄像机位置
+				m_Camera.transform.position = new Vector3(
 					m_Player.position.x - m_TempVec3.x,
-					m_Player.position.y + m_TempVec3.y,
-					m_Player.position.z - m_TempVec3.z
-				);
+                    m_Player.position.y + m_TempVec3.y,
+                    m_Player.position.z - m_TempVec3.z
+                    );
+			}
+		}
+
+		public static void OnShakeCamera()
+		{
+			m_IsShake = true;
 		}
 
 	}

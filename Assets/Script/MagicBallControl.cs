@@ -29,6 +29,8 @@ namespace ActionGame
 				if(dist <= 2.0f)
 				{
 					m_IsHitTarget = true;
+					// 击中目标，产生震屏效果
+					ThirdPersonCamera.OnShakeCamera();
 					return;
 				}
 

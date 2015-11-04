@@ -17,6 +17,7 @@ namespace ActionGame
 		float m_RotateSpeed = 10.0f, m_CurAtkTime = 0.0f;
 		Global.DIR m_Dir = Global.DIR.D_NONE;
 		AnimationManagerPlayer m_AnimationManager;
+		CharacterController m_Controller;
 
 		/// <summary>
 		/// 玩家状态
@@ -25,6 +26,7 @@ namespace ActionGame
 		{
 			PS_IDLE,
 			PS_WALK,
+			PS_WAIT_ANIMAT,			// 等待动画播放完状态
 			PS_ROTATE_TO_TARGET,
 			PS_MOVE_TO_TARGET,
 			PS_PRE_ATTACK,
@@ -91,6 +93,7 @@ namespace ActionGame
 			m_TempVec3 = new Vector3();
 			m_TempAnlge = new Vector3();
 			m_AnimationManager = gameObject.GetComponent<AnimationManagerPlayer>();
+			m_Controller = gameObject.GetComponent<CharacterController>();
 		}
 		
 		// Update is called once per frame
@@ -112,9 +115,23 @@ namespace ActionGame
 				}
 				break;
 
-			case PLAYER_STATE.PS_WALK:
+			case PLAYER_STATE.PS_WAIT_ANIMAT:
 				{
-					_DirProcess();
+					if(!m_AnimationManager.IsPlaying())
+					{
+						_OnIdle();
+					}
+
+					if(m_CurAtkTime >= 0.0f)
+					{
+						m_CurAtkTime -= Time.deltaTime;
+	                  }
+                }
+                break;
+                    
+                case PLAYER_STATE.PS_WALK:
+				{
+					_MoveProcess();
 					m_AnimationManager.animationProcessor = m_AnimationManager.Walk;
 
 					if(m_CurAtkTime >= 0.0f)
@@ -209,7 +226,15 @@ namespace ActionGame
 						}
 
 						m_Magicball.gameObject.SetActive(false);
-						_OnIdle();
+						// 若攻击动画未播完，等待其播完后，再继续
+						if(m_AnimationManager.IsPlaying())
+						{
+							_OnWaitAnimation();
+						}
+						else
+						{
+							_OnIdle();
+						}
 						break;
 					}
 				}
@@ -252,7 +277,7 @@ namespace ActionGame
 			m_Data.levelData.levelUpExp = 100;
 		}
 
-		void _DirProcess()
+		void _MoveProcess()
 		{
 			m_TempVec3.Set(0, 0, 0);
 			m_TempAnlge.Set(transform.eulerAngles.x, transform.eulerAngles.y, transform.eulerAngles.z);
@@ -314,7 +339,12 @@ namespace ActionGame
 				break;
 			}
 
-			transform.position += m_TempVec3 *(m_Data.attrib.movSp*Time.deltaTime);
+			// 向前方打一条射线，判断移动是否会撞到障碍物
+			if(!Physics.Raycast(transform.position, m_TempVec3, m_Data.attrib.movSp*Time.deltaTime))
+			{
+				// 为发生碰撞，则产生移动
+				m_Controller.SimpleMove(m_TempVec3*m_Data.attrib.movSp);
+			}
 			transform.eulerAngles = m_TempAnlge;
 		}
 
@@ -411,6 +441,10 @@ namespace ActionGame
 				m_Data.state = PLAYER_STATE.PS_LEVELUP;
 				m_LevelUpEffect.gameObject.SetActive(true);
 				m_LevelUpEffect.Play(true);
+
+				// 升级了血量和MP都有提升，需要更新显示
+				PlayingManager.Inst.AttribPanel.OnHpBarChange();
+				PlayingManager.Inst.AttribPanel.OnMpBarChange();
 			}
 
 			// 更新UI
@@ -424,6 +458,14 @@ namespace ActionGame
 		{
 			m_Data.state = PLAYER_STATE.PS_IDLE;
 			m_AnimationManager.animationProcessor = m_AnimationManager.Idle;
+		}
+
+		/// <summary>
+		/// 处理玩家攻击动画尚未播完即击中敌人的情况
+		/// </summary>
+        void _OnWaitAnimation()
+		{
+			m_Data.state = PLAYER_STATE.PS_WAIT_ANIMAT;
 		}
 
 		/// <summary>

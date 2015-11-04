@@ -95,15 +95,7 @@ public class DamageHudControl : MonoBehaviour {
 
 		// 保证伤害数字显示在人物的头顶上
 		m_TempVec3 = trans.position;
-		// 玩家未绑定角色控制器，使用了胶囊体碰撞器，特殊处理下
-		if(trans.gameObject.tag == "Player")
-		{
-			m_DamageTextList[m_CurUseHudCount-1].offsetY = trans.gameObject.GetComponent<CapsuleCollider>().bounds.size.y;
-		}
-		else
-		{
-			m_DamageTextList[m_CurUseHudCount-1].offsetY = trans.gameObject.GetComponent<CharacterController>().bounds.size.y;
-		}
+		m_DamageTextList[m_CurUseHudCount-1].offsetY = trans.gameObject.GetComponent<CharacterController>().bounds.size.y;
 		// 转换为屏幕坐标
 		m_TempVec3.y += m_DamageTextList[m_CurUseHudCount-1].offsetY;
 		m_TempVec3 = Camera.main.WorldToScreenPoint(m_TempVec3);
