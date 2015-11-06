@@ -85,8 +85,8 @@ namespace ActionGame
 
 		public bool IsAttack1End()
 		{
-			if(m_AnimationComponent.IsPlaying("Attack1") &&
-			   m_AnimationComponent[ m_Attack.Animation.name ].normalizedTime > 0.8f)
+			if(m_AnimationComponent.IsPlaying(m_Attack.Animation.name) &&
+			   m_AnimationComponent[m_Attack.Animation.name].normalizedTime > 0.6f)
 			{
 				return true;
 			}

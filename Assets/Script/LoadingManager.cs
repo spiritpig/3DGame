@@ -19,11 +19,6 @@ namespace ActionGame
 			StartCoroutine("LoadScene");
 		}
 		
-		// Update is called once per frame
-		void Update () 
-		{
-		}
-
 		// 滚动流畅的版本，但是，可能会拖慢加载时间
 		IEnumerator LoadScene()
 		{

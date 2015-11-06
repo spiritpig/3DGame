@@ -1,6 +1,8 @@
 ﻿/// <summary>
 /// 类名： MagicBallControl
 /// 用途： 管理魔法球的行为和状态
+/// 
+/// 2015/11/05, 添加击打动画播放
 /// </summary>
 
 using UnityEngine;
@@ -9,6 +11,7 @@ using System.Collections;
 namespace ActionGame
 {
 	public class MagicBallControl : MonoBehaviour { 
+		public GameObject m_HitEffect;
 		GameObject m_Target = null;
 		bool m_IsHitTarget = false;
 		public bool IsHitTarget {
@@ -18,7 +21,7 @@ namespace ActionGame
 		}
 
 		Vector3 m_TempVec3;
-		float m_Speed = 10.0f;
+		float m_Speed = 30.0f;
 
 		void Update()
 		{
@@ -31,6 +34,10 @@ namespace ActionGame
 					m_IsHitTarget = true;
 					// 击中目标，产生震屏效果
 					ThirdPersonCamera.OnShakeCamera();
+
+					// 播放击中的粒子特效
+					m_HitEffect.transform.position = m_Target.GetComponent<EnemyControl>().GetHitPos();;
+					m_HitEffect.GetComponent<ParticleSystem>().Play();
 					return;
 				}
 

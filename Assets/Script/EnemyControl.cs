@@ -1,4 +1,4 @@
-﻿/// <summary>
+/// <summary>
 /// 类名: EnemyControl
 /// 描述: 控制怪物行为
 /// </summary>
@@ -56,7 +56,6 @@ namespace ActionGame
 		public EnemyData Data {
 			get { return m_Data; }
 		}
-		
 
 		// 平面上移动方向
 		Vector3 m_Dir, m_PrevDir, m_TargetPostion, m_TempVec3;
@@ -66,7 +65,7 @@ namespace ActionGame
 				m_TempFloat = 0.0f, m_RotateSpeed = 10.0f,
 				m_CurAtkTime = 0.0f;
 		bool m_IsAttacked = false;
-		GameObject m_SelectedPlane = null;
+		GameObject m_SelectedPlane = null, m_HitObj;
 		CharacterController m_Controller;
 		AnimationManagerEnemy m_AnimationManager;
 
@@ -80,6 +79,8 @@ namespace ActionGame
 			m_Dir = new Vector3();
 			m_SelectedPlane = transform.FindChild("SelectedPlane").gameObject;
 			m_SelectedPlane.SetActive(false);
+
+			m_HitObj = transform.FindChild("HitObj").gameObject;
 
 			_InitData();
 		}
@@ -175,10 +176,10 @@ namespace ActionGame
 					}
 
 					// 朝着 玩家移动
-					m_Dir = PlayingManager.Inst.Player.transform.position - transform.position;
+					m_Dir = DungonManager.Inst.Player.transform.position - transform.position;
 					m_Dir.Normalize();
 					m_Controller.SimpleMove(m_Dir*m_Data.attrib.movSp);
-					transform.LookAt(PlayingManager.Inst.Player.transform.position);
+					transform.LookAt(DungonManager.Inst.Player.transform.position);
 				}
 				break;
 			
@@ -204,7 +205,7 @@ namespace ActionGame
 					if(!m_IsAttacked &&
 				   		m_AnimationManager.IsAttack1End())
 					{
-						PlayingManager.Inst.Player.BeAttack(m_Data.attrib.atkPhy);
+						DungonManager.Inst.Player.BeAttack(m_Data.attrib.atkPhy);
 						m_IsAttacked = true;
 					}
 
@@ -290,7 +291,7 @@ namespace ActionGame
 		/// </summary>
 		bool _IsPlayerInRange()
 		{
-			m_TempFloat = Vector3.Distance( PlayingManager.Inst.Player.transform.position, transform.position );
+			m_TempFloat = Vector3.Distance( DungonManager.Inst.Player.transform.position, transform.position );
 			// 若玩家接近了怪物，别犹豫冲过去
 			if( m_TempFloat <= m_Data.searchData.range )
 			{
@@ -304,7 +305,7 @@ namespace ActionGame
 		/// </summary>
 		bool _IsOutOfAtkRange()
 		{
-			m_TempFloat = Vector3.Distance(PlayingManager.Inst.Player.transform.position, 
+			m_TempFloat = Vector3.Distance(DungonManager.Inst.Player.transform.position, 
 			                               transform.position);
 			return m_TempFloat > m_Data.attrib.atkRange;
 		}
@@ -325,7 +326,7 @@ namespace ActionGame
 		void _OnChaseStart()
 		{
 			_PrepareBodyRotate(ENEMYSTATE.ES_CHASE);
-			m_TempVec3 = PlayingManager.Inst.Player.transform.position - transform.position;
+			m_TempVec3 = DungonManager.Inst.Player.transform.position - transform.position;
 			m_Dir = m_TempVec3;
 			m_Dir.Normalize();
 			m_CurChaseTime = m_Data.chaseData.maxTime;
@@ -406,7 +407,7 @@ namespace ActionGame
 			}
 
 			_OnBeAttack();
-			PlayingManager.Inst.DamageHudControl.UseDamageHud(transform, (int)val);
+			DungonManager.Inst.DamageHudControl.UseDamageHud(transform, (int)val);
 			return false;
 		}
 
@@ -428,6 +429,11 @@ namespace ActionGame
 			gameObject.tag = "Enemy";
 			m_SelectedPlane.SetActive(false);
 			m_SelectedPlane.GetComponent<SelectedPlaneControl>().OnFree();
+		}
+
+		public Vector3 GetHitPos()
+		{
+			return m_HitObj.transform.position;
 		}
 	}
 }

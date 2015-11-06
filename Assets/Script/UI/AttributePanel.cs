@@ -1,4 +1,4 @@
-﻿/// <summary>
+/// <summary>
 /// 类名: AttributePanel
 /// 描述: 画面左上角状态栏，用于控制其中各滚动条的滚动
 /// </summary>
@@ -21,7 +21,7 @@ namespace ActionGame
 			m_AttribExpBar = gameObject.transform.FindChild("AttribExpBar").gameObject;
 
 			// 预更新一次人物状态栏
-			m_PlayerData = PlayingManager.Inst.Player.Data;
+			m_PlayerData = DungonManager.Inst.Player.Data;
 			OnHpBarChange();
 			OnMpBarChange();
 			OnExpBarChange();
@@ -29,7 +29,7 @@ namespace ActionGame
 
 		public void OnHpBarChange()
 		{
-			m_PlayerData = PlayingManager.Inst.Player.Data;
+			m_PlayerData = DungonManager.Inst.Player.Data;
 			m_HpBar.GetComponent<ValBarControl>().OnValueChange(
 				m_PlayerData.attrib.hp/m_PlayerData.attrib.maxHp, 
 				m_PlayerData.attrib.hp.ToString() + "/" + m_PlayerData.attrib.maxHp.ToString() );
@@ -37,7 +37,7 @@ namespace ActionGame
 
 		public void OnMpBarChange()
 		{
-			m_PlayerData = PlayingManager.Inst.Player.Data;
+			m_PlayerData = DungonManager.Inst.Player.Data;
 			m_MpBar.GetComponent<ValBarControl>().OnValueChange(
 				m_PlayerData.attrib.eng/m_PlayerData.attrib.maxEng, 
 				m_PlayerData.attrib.eng.ToString() + "/" + m_PlayerData.attrib.maxEng.ToString() );
@@ -45,7 +45,7 @@ namespace ActionGame
 
 		public void OnExpBarChange()
 		{
-			m_PlayerData = PlayingManager.Inst.Player.Data;
+			m_PlayerData = DungonManager.Inst.Player.Data;
 			m_AttribExpBar.GetComponent<ValBarControl>().OnValueChange(
 				(float)m_PlayerData.levelData.exp/m_PlayerData.levelData.levelUpExp, 
 				m_PlayerData.levelData.exp.ToString() + "/" + m_PlayerData.levelData.levelUpExp.ToString() );

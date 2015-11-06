@@ -1,6 +1,6 @@
 ﻿/// <summary>
-/// 类名： PlayingManager
-/// 用途： 主场景管理类，负责管理主场景的行为
+/// 类名： DungonManager
+/// 用途： 地下城管理类，负责管理玩家在地下城中的行为
 /// </summary>
 
 using UnityEngine;
@@ -9,8 +9,8 @@ using System.Collections;
 
 namespace ActionGame
 {
-	public class PlayingManager : MonoBehaviour {
-		public static PlayingManager Inst;
+	public class DungonManager : MonoBehaviour, IManager {
+		public static DungonManager Inst;
 		private PlayerControl m_Player = null;
 		private EnemyManager m_EnemyManager = null;
 		public PlayerControl Player {
@@ -27,63 +27,45 @@ namespace ActionGame
 			}
 		}
 
-		public enum PMANAGER_STATE
+		public enum DMANAGER_STATE
 		{
-			PMS_IDLE,
-			PMS_WIN,
-			PMS_CITY
+			DMS_SLEEP,
+			DMS_AWAKE,
+			DMS_NORMAL,
+			DMS_WIN
 		}
-		PMANAGER_STATE m_State = PMANAGER_STATE.PMS_IDLE;
-
-		// 主角位置枚举变量
-		public enum PLAYER_LOCATION
-		{
-			PL_TUTORIAL,
-			PL_CITY
+		DMANAGER_STATE m_State = DMANAGER_STATE.DMS_SLEEP;
+		public DMANAGER_STATE State {
+			get { return m_State; }
+			set { m_State = value; }
 		}
-		PLAYER_LOCATION m_Location = PLAYER_LOCATION.PL_TUTORIAL;
-
-		// 主城出生点
-		public Transform m_CitySpwan;
+		Transform m_PlayerSpawn;
 
 		// Use this for initialization
 		void Start () 
 		{
 			m_Player = GameObject.FindGameObjectWithTag("Player").GetComponent<PlayerControl>();
 			m_EnemyManager = GameObject.FindGameObjectWithTag("EnemyManager").GetComponent<EnemyManager>();
-			m_AttribPanel = GameObject.Find("Canvas/AttribPanel").GetComponent<AttributePanel>();
+			m_AttribPanel = GameObject.Find("MainUICanvas/AttribPanel").GetComponent<AttributePanel>();
 			m_DamageHudControl = GameObject.Find("DamageHudCanvas").GetComponent<DamageHudControl>();
-			Button atkBtn = GameObject.Find("Canvas/AttackBtn").GetComponent<Button>();
+			Button atkBtn = GameObject.Find("MainUICanvas/AttackBtn").GetComponent<Button>();
 			atkBtn.onClick.AddListener(ProcessAttack);
 
+			m_PlayerSpawn = transform.FindChild("Tutorial").FindChild("PlayerSpawn");
+
 			// 需要控制初始化时机的脚本在此处初始化
-			m_Player.Init();
 			m_EnemyManager.Init();
 			m_DamageHudControl.Init();
 			Inst = this;
+
+			OnSleep();
 		}
 
 		void Update()
 		{
 			switch(m_State)
 			{
-			case PMANAGER_STATE.PMS_IDLE:
-				{
-					if(m_EnemyManager.EnemyList.Count <= 0)
-					{
-						m_State = PMANAGER_STATE.PMS_WIN;
-					}
-				}
-				break;
-
-			case PMANAGER_STATE.PMS_WIN:
-				{
-					m_Location = PLAYER_LOCATION.PL_CITY;
-					ChangeScene();
-				}
-				break;
-
-			case PMANAGER_STATE.PMS_CITY:
+			case DMANAGER_STATE.DMS_WIN:
 				{
 				}
 				break;
@@ -107,19 +89,25 @@ namespace ActionGame
 		}
 
 		/// <summary>
-		/// 切换玩家所处的场景
+		/// 当玩家进入地下城时，被唤醒
 		/// </summary>
-		void ChangeScene()
+		public void OnAwake()
 		{
-			switch(m_Location)
-			{
-			case PLAYER_LOCATION.PL_CITY:
-				{
-					m_Player.transform.position = m_CitySpwan.transform.position;
-					m_State = PMANAGER_STATE.PMS_CITY;
-				}
-				break;
-			}
-		}
-	}
+			gameObject.SetActive(true);
+			m_EnemyManager.gameObject.SetActive(true);	
+			m_State = DMANAGER_STATE.DMS_NORMAL;
+			m_Player.transform.position = m_PlayerSpawn.position;
+			m_Player.transform.rotation = m_PlayerSpawn.rotation;
+			m_Player.Data.isInCity = false;
+        }
+
+		/// <summary>
+		/// 当玩家进入地下城时，被唤醒
+		/// </summary>
+		public void OnSleep()
+		{
+			gameObject.SetActive(false);
+			m_EnemyManager.gameObject.SetActive(false);
+        }
+    }
 }

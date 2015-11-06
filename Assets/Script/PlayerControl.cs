@@ -1,4 +1,4 @@
-﻿/// <summary>
+/// <summary>
 /// 类名： PlayerControl
 /// 用途： 管理玩家的行为和状态
 /// </summary>
@@ -55,6 +55,7 @@ namespace ActionGame
 			public PLAYER_STATE state;
 			public Global.Attribute attrib;
 			public LevelData levelData;
+			public bool isInCity;
 
 			public void LevelUp()
 			{
@@ -192,7 +193,7 @@ namespace ActionGame
 					m_CurAtkTime -= Time.deltaTime;
 
 					// 攻击动画播放完成后，释放魔法球
-					if(!m_AnimationManager.IsAttack1End())
+					if(m_AnimationManager.IsAttack1End())
 					{
 						m_Data.state = PLAYER_STATE.PS_ATTACK;
 						m_Magicball.gameObject.SetActive(true);
@@ -256,6 +257,7 @@ namespace ActionGame
 			m_Data = new PlayerData();
 			m_Data.type = PLAYER_TYPE.PT_MAGE;
 			m_Data.state = PLAYER_STATE.PS_IDLE;
+			m_Data.isInCity = true;
 
 			// 属性数据
 			m_Data.attrib.charName = "Mage";
@@ -443,12 +445,12 @@ namespace ActionGame
 				m_LevelUpEffect.Play(true);
 
 				// 升级了血量和MP都有提升，需要更新显示
-				PlayingManager.Inst.AttribPanel.OnHpBarChange();
-				PlayingManager.Inst.AttribPanel.OnMpBarChange();
+				DungonManager.Inst.AttribPanel.OnHpBarChange();
+				DungonManager.Inst.AttribPanel.OnMpBarChange();
 			}
 
 			// 更新UI
-			PlayingManager.Inst.AttribPanel.OnExpBarChange();
+			DungonManager.Inst.AttribPanel.OnExpBarChange();
 		}
 
 		/// <summary>
@@ -509,7 +511,8 @@ namespace ActionGame
 		public bool CanStartAttack()
 		{
 			// 攻击的CD时间未到，再等会
-			if(m_CurAtkTime > 0.0f)
+			// 或者在城镇中，不宜杀生
+			if(m_Data.isInCity || m_CurAtkTime > 0.0f)
 			{
 				return false;
 			}
@@ -534,8 +537,8 @@ namespace ActionGame
 			}
 
 			// 更新UI
-			PlayingManager.Inst.AttribPanel.OnHpBarChange();
-			PlayingManager.Inst.DamageHudControl.UseDamageHud(transform, (int)val);
+			DungonManager.Inst.AttribPanel.OnHpBarChange();
+			DungonManager.Inst.DamageHudControl.UseDamageHud(transform, (int)val);
 		}
 
 		/// <summary>

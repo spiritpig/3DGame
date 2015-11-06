@@ -1,4 +1,4 @@
-﻿/// <summary>
+/// <summary>
 /// 类名: StateContent
 /// 描述: 控制状态面板中，状态信息部分的数据更新
 /// </summary>
@@ -35,13 +35,13 @@ namespace ActionGame
 			m_DefMagText = gameObject.transform.FindChild("DefMagText").GetComponent<Text>();
 			m_ExpBarControl = gameObject.transform.FindChild("ExpBar").GetComponent<ValBarControl>();
 
-			m_Data = PlayingManager.Inst.Player.Data;
+			m_Data = DungonManager.Inst.Player.Data;
 			m_ExpBarControl.Init();
 		}
 		
 		public void RefreshData()
 		{
-			m_Data = PlayingManager.Inst.Player.Data;
+			m_Data = DungonManager.Inst.Player.Data;
 
 			m_NameText.text = "角色名: " + m_Data.attrib.charName;
 			m_LevelText.text = "等级: " + m_Data.levelData.level;

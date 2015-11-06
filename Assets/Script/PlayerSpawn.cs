@@ -9,11 +9,10 @@ using System.Collections;
 namespace ActionGame
 {
 	public class PlayerSpawn : MonoBehaviour {
-		public GameObject m_Player;
 
-		// Use this for initialization
 		void Start () {
-			Instantiate( m_Player, transform.position, transform.rotation );
+			GameObject playerPrefab = Resources.Load("Prefab/Player") as GameObject;
+			Instantiate( playerPrefab, transform.position, transform.rotation );
 		}
 		
 	}
