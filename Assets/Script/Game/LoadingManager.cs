@@ -13,7 +13,7 @@ namespace ActionGame
 		ValBarControl m_BarControl;
 
 		// Use this for initialization
-		void Start () 
+		void Awake () 
 		{
 			m_BarControl = gameObject.GetComponent<ValBarControl>();
 			StartCoroutine("LoadScene");

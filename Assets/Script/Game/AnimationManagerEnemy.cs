@@ -21,7 +21,7 @@ namespace ActionGame
 		AnimatData m_Idle, m_Run, m_Attack, m_Death, m_TakeDamager;
 		
 		// Use this for initialization
-		void Start () 
+		void Awake () 
 		{
 			m_AnimationComponent = gameObject.GetComponent<Animation>();
 			

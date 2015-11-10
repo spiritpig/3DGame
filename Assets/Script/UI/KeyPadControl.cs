@@ -54,7 +54,7 @@ namespace ActionGame
 		Sprite m_Normal;
 
 		// Use this for initialization
-		void Start () 
+		void Awake () 
 		{
 			m_RelatPos = new Vector2();
 			m_TempVec2 = new Vector2();

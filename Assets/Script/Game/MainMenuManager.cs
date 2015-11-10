@@ -20,7 +20,7 @@ namespace ActionGame
 		Button m_StartBtn;
 		
 		// Use this for initialization
-		void Start () 
+		void Awake () 
 		{
 			m_StartBtn = GameObject.Find("Canvas/StartGame").GetComponent<Button>();
 			m_StartBtn.onClick.AddListener( OnClick );

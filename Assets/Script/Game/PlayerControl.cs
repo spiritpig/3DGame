@@ -4,6 +4,7 @@
 /// </summary>
 
 using UnityEngine;
+using UnityEngine.UI;
 using System.Collections;
 
 namespace ActionGame
@@ -31,7 +32,7 @@ namespace ActionGame
 			PS_MOVE_TO_TARGET,
 			PS_PRE_ATTACK,
 			PS_ATTACK,
-			PS_LEVELUP,
+			PS_RELEASE_MAGIC,
 			PS_Death
 		}
 
@@ -95,6 +96,9 @@ namespace ActionGame
 			m_TempAnlge = new Vector3();
 			m_AnimationManager = gameObject.GetComponent<AnimationManagerPlayer>();
 			m_Controller = gameObject.GetComponent<CharacterController>();
+
+			Button btn = GameObject.Find("MainUICanvas/Skill1Btn").GetComponent<Button>();
+			btn.onClick.AddListener(OnReleaseMagicOne);
 		}
 		
 		// Update is called once per frame
@@ -210,7 +214,7 @@ namespace ActionGame
 					// 玩家只需判断目标是否死亡
 					if(m_CurTarget.Data.state == EnemyControl.ENEMYSTATE.ES_DEATH)
 					{
-						_OnAddExp();
+						OnAddExp(m_CurTarget.Data.attrib.gainExp);
 
 						m_Magicball.gameObject.SetActive(false);
 						_OnIdle();
@@ -223,7 +227,7 @@ namespace ActionGame
 						// 当目标死亡了，经验加上去
 						if(m_CurTarget.BeAttack(m_Data.attrib.atkPhy))
 						{
-							_OnAddExp();
+							OnAddExp(m_CurTarget.Data.attrib.gainExp);
 						}
 
 						m_Magicball.gameObject.SetActive(false);
@@ -241,11 +245,11 @@ namespace ActionGame
 				}
 				break;
 
-			case PLAYER_STATE.PS_LEVELUP:
+			case PLAYER_STATE.PS_RELEASE_MAGIC:
 				{
-					if(!m_LevelUpEffect.isPlaying)
+					if(!m_AnimationManager.IsPlaying())
 					{
-					_OnIdle();
+						_OnIdle();
 					}
 				}
 				break;
@@ -344,7 +348,7 @@ namespace ActionGame
 			// 向前方打一条射线，判断移动是否会撞到障碍物
 			if(!Physics.Raycast(transform.position, m_TempVec3, m_Data.attrib.movSp*Time.deltaTime))
 			{
-				// 为发生碰撞，则产生移动
+				// 未发生碰撞，则产生移动
 				m_Controller.SimpleMove(m_TempVec3*m_Data.attrib.movSp);
 			}
 			transform.eulerAngles = m_TempAnlge;
@@ -431,16 +435,15 @@ namespace ActionGame
 		/// <summary>
 		/// 
 		/// </summary>
-		void _OnAddExp()
+		public void OnAddExp(int val)
 		{
-			m_Data.levelData.exp += m_CurTarget.Data.attrib.gainExp;
+			m_Data.levelData.exp += val;
 
 			// 若经验满了，则升级
 			if(m_Data.levelData.exp >= m_Data.levelData.levelUpExp)
 			{
 				m_Data.LevelUp();
 
-				m_Data.state = PLAYER_STATE.PS_LEVELUP;
 				m_LevelUpEffect.gameObject.SetActive(true);
 				m_LevelUpEffect.Play(true);
 
@@ -525,6 +528,12 @@ namespace ActionGame
 			return false;
 		}
 
+		public void GetOriVec3(out Vector3 vec3)
+		{
+			vec3 = m_FrontObj.transform.position - transform.position;
+			vec3.Normalize();
+		}
+
 		/// <summary>
 		/// 被攻击函数，减少血量
 		/// </summary>
@@ -563,5 +572,25 @@ namespace ActionGame
 			m_CurAtkTime = m_Data.attrib.atkSp;
 			m_AnimationManager.animationProcessor = m_AnimationManager.Walk;
 		}
+
+		/// <summary>
+		/// 回调函数，由技能一按钮调用. 处理释放技能一的情况
+		/// </summary>
+		public void OnReleaseMagicOne()
+		{
+			if(!CanStartAttack())
+			{
+				return ;
+			}
+			
+			// 若可以开始攻击，尝试释放技能，若释放失败则代表CD中
+			if(DungonManager.Inst.SkillManager.OnReleaseMagicOne())
+			{
+				m_AnimationManager.animationProcessor = null;
+				m_AnimationManager.OnReleaseMagicOne();
+				m_Data.state = PLAYER_STATE.PS_RELEASE_MAGIC;
+			}
+		}
+
 	}
 }

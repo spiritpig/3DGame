@@ -13,14 +13,16 @@ namespace ActionGame
 		GameObject m_DungonEntryUI;
 		CanvasRenderer m_DungonEntryUIRenerer;
 		Image m_DungonEntryUIBg;
+		DungonItemManager m_DungonItemManager;
 		bool m_IsEnterRange = false;
 
 		// Use this for initialization
-		void Start () 
+		void Awake () 
 		{
 			m_DungonEntryUI = GameObject.Find("DungonEntryCanvas");
 			m_DungonEntryUIRenerer = m_DungonEntryUI.transform.FindChild("DungonEntryBG").GetComponent<CanvasRenderer>();
 			m_DungonEntryUIBg = m_DungonEntryUIRenerer.gameObject.GetComponent<Image>();
+			m_DungonItemManager = GameObject.Find("DungonEntryCanvas/DungonItemList").GetComponent<DungonItemManager>();
 
 			Button enterBtn =m_DungonEntryUI.transform.FindChild("Enter").GetComponent<Button>();
 			enterBtn.onClick.AddListener(OnEnterDungon);
@@ -32,10 +34,13 @@ namespace ActionGame
 
 		public void OnEnterDungon()
 		{
-			m_DungonEntryUI.SetActive(false);
-			DungonManager.Inst.OnAwake();
-			CityLifeManager.Inst.OnSleep();
-			CityLifeManager.Inst.Player.gameObject.SetActive(true);
+			if(m_DungonItemManager.IsSelectedDungonWolf())
+			{
+				m_DungonEntryUI.SetActive(false);
+				DungonManager.Inst.OnAwake();
+				CityLifeManager.Inst.OnSleep();
+				CityLifeManager.Inst.Player.gameObject.SetActive(true);
+			}
 		}
 
 		public IEnumerator UIFadeIn()

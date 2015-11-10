@@ -14,8 +14,9 @@ namespace ActionGame
 		Image m_HardLevelImg;
 		Image m_EvilLevelImg;
 
-		void Start () 
+		void Awake () 
 		{
+			/*
 			m_NormalLevelImg = transform.FindChild("NormalLevelBtn").GetComponent<Image>();
 			m_HardLevelImg = transform.FindChild("HardLevelBtn").GetComponent<Image>();
 			m_EvilLevelImg = transform.FindChild("EvilLevelBtn").GetComponent<Image>();
@@ -28,8 +29,10 @@ namespace ActionGame
 			m_NormalLevelImg.material = Instantiate(grayScaleMat) as Material;
 			m_HardLevelImg.material = Instantiate(grayScaleMat) as Material;
 			m_EvilLevelImg.material = Instantiate(grayScaleMat) as Material;
+			*/
 		}
 
+		/*
 
 		/// <summary>
 		/// 三个按钮的点击事件
@@ -54,5 +57,6 @@ namespace ActionGame
 			m_HardLevelImg.material.SetInt("_IsGrayScale", 0);
 			m_EvilLevelImg.material.SetInt("_IsGrayScale", 0);
 		}
+		*/
 	}
 }

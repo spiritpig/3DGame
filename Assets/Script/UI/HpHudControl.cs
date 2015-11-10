@@ -22,7 +22,7 @@ namespace ActionGame
 		}
 
 		// Use this for initialization
-		void Start () 
+		void Awake () 
 		{
 			m_FollowObj = transform;
 			m_Enemy = gameObject.GetComponent<EnemyControl>();

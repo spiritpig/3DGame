@@ -1,20 +1,21 @@
-﻿Shader "Hidden/GrayScaleShader"
+
+Shader "Hidden/MaskShder"
 {
 	Properties
 	{
 		_MainTex ("Texture", 2D) = "white" {}
-		_IsGrayScale ("IsGray", int) = 0
+		_MaskHeight("MaskHeight", Range(0,1)) = 1.0
 	}
 	SubShader
 	{
 		Tags { "RenderType" = "Transparent" "Queue" = "Transparent" }
 		// No culling or depth
 		Cull Off ZWrite Off ZTest Always
-		AlphaTest Greater 0.5
-		Blend SrcAlpha OneMinusSrcAlpha
 
 		Pass
 		{
+			Blend SrcAlpha OneMinusSrcAlpha
+		
 			CGPROGRAM
 			#pragma vertex vert
 			#pragma fragment frag
@@ -42,18 +43,15 @@
 			}
 			
 			sampler2D _MainTex;
-			int _IsGrayScale;
+			float _MaskHeight;
 
 			fixed4 frag (v2f i) : SV_Target
 			{
 				fixed4 col = tex2D(_MainTex, i.uv);
 				
-				if(_IsGrayScale == 1)
-				{
-					float val = col.r + col.g + col.b;
-					val /= 3.0;
-					col.rgb = val;
-				}
+				// 去掉透明度接近0的位置，和需要被遮罩的位置 
+				clip(col.a - 0.01);
+				clip(_MaskHeight - i.uv.y);
 				
 				return col;
 			}
@@ -61,4 +59,3 @@
 		}
 	}
 }
-

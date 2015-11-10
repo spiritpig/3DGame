@@ -19,10 +19,10 @@ namespace ActionGame
 			public AnimationClip Animation;
 			public float AnimatTime;
 		}
-		AnimatData m_Idle, m_Walk, m_Attack;
+		AnimatData m_Idle, m_Walk, m_Attack, m_ReleaseMagicOne;
 
 		// Use this for initialization
-		void Start () 
+		void Awake () 
 		{
 			m_AnimationComponent = gameObject.GetComponent<Animation>();
 
@@ -53,8 +53,12 @@ namespace ActionGame
 			m_Walk.Animation = m_AnimationComponent.GetClip( "Run" );
 
 			m_Attack = new AnimatData();
-			m_Attack.AnimatTime = Global.g_PlayerRunAnimatTime;
+			m_Attack.AnimatTime = Global.g_PlayerAtkAnimatTime;
 			m_Attack.Animation = m_AnimationComponent.GetClip( "Attack1" );
+
+			m_ReleaseMagicOne = new AnimatData();
+			m_ReleaseMagicOne.AnimatTime = Global.g_PlayerMagicOneAnimatTime;
+			m_ReleaseMagicOne.Animation = m_AnimationComponent.GetClip( "Skill-MagicBall" );
 		}
 
 		/// <summary>
@@ -76,6 +80,12 @@ namespace ActionGame
 		{
 			m_AnimationComponent.Play( m_Attack.Animation.name );
 			m_AnimationComponent[ m_Attack.Animation.name ].speed = m_Attack.AnimatTime;
+		}
+
+		public void OnReleaseMagicOne()
+		{
+			m_AnimationComponent.Play( m_ReleaseMagicOne.Animation.name );
+			m_AnimationComponent[ m_ReleaseMagicOne.Animation.name ].speed = m_ReleaseMagicOne.AnimatTime;
 		}
 
 		public bool IsPlaying()

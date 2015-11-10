@@ -17,7 +17,7 @@ namespace ActionGame
 		public float initVal = 1.0f;
 
 		// Use this for initialization
-		void Start () 
+		void Awake () 
 		{
 			Init();
 		}

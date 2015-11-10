@@ -32,7 +32,7 @@ namespace ActionGame
 		public static CityLifeManager Inst = null;
 
 		// Use this for initialization
-		void Start () 
+		void Awake () 
 		{
 			m_CitySpawn = transform.FindChild("CitySpawn");
 			m_Player = GameObject.FindGameObjectWithTag("Player").GetComponent<PlayerControl>();

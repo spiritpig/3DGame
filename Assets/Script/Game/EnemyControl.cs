@@ -70,7 +70,7 @@ namespace ActionGame
 		AnimationManagerEnemy m_AnimationManager;
 
 		// Use this for initialization
-		void Start () 
+		void Awake () 
 		{
 			m_Controller = GetComponent<CharacterController>();
 			m_AnimationManager = gameObject.GetComponent<AnimationManagerEnemy>();
@@ -409,6 +409,14 @@ namespace ActionGame
 			_OnBeAttack();
 			DungonManager.Inst.DamageHudControl.UseDamageHud(transform, (int)val);
 			return false;
+		}
+
+		/// <summary>
+		/// 返回该怪物是否死亡
+		/// </summary>
+		public bool IsDeath()
+		{
+			return m_Data.attrib.hp <= 0.0f;
 		}
 
 		/// <summary>

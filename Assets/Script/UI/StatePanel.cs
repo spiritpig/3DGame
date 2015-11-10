@@ -15,7 +15,7 @@ namespace ActionGame
 
 		void Start()
 		{
-			Button stateBtn = GameObject.FindGameObjectWithTag("UI_StateBtn").GetComponent<Button>();
+			Button stateBtn = GameObject.Find("MainUICanvas/InfoPanel/StateBtn").GetComponent<Button>();
 			stateBtn.onClick.AddListener(ActiveByCurrentState);
 			m_StateContent.Init();
 

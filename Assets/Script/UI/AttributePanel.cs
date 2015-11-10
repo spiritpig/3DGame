@@ -14,7 +14,7 @@ namespace ActionGame
 		PlayerControl.PlayerData m_PlayerData;
 
 		// Use this for initialization
-		void Start () 
+		void Awake () 
 		{
 			m_HpBar = gameObject.transform.FindChild("HpBar").gameObject;
 			m_MpBar = gameObject.transform.FindChild("MpBar").gameObject;

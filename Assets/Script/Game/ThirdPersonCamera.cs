@@ -15,7 +15,7 @@ namespace ActionGame
 		Vector3 m_ShakeDelta = new Vector3(0.0f, 0.2f, 0.0f);
 
 		// Use this for initialization
-		void Start () 
+		void Awake () 
 		{
 			m_Player = GameObject.FindGameObjectWithTag( "Player" ).transform;
 			m_Camera = Camera.main;

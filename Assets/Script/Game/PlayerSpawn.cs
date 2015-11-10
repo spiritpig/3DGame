@@ -10,7 +10,7 @@ namespace ActionGame
 {
 	public class PlayerSpawn : MonoBehaviour {
 
-		void Start () {
+		void Awake () {
 			GameObject playerPrefab = Resources.Load("Prefab/Player") as GameObject;
 			Instantiate( playerPrefab, transform.position, transform.rotation );
 		}

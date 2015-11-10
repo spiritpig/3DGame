@@ -8,7 +8,7 @@ using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using System.Collections;
 
-namespace ActioGame
+namespace ActionGame
 {
 	public class DungonItemControl : MonoBehaviour, IPointerClickHandler
 	{
@@ -16,17 +16,29 @@ namespace ActioGame
 		public Sprite m_SelectedSpr;
 		Image m_Img;
 		float m_ScaleRate = 1.2f;
-		bool m_IsSelected = false;
+		bool m_IsSelected;
+		public bool IsSelected {
+			get {
+				return m_IsSelected;
+			}
+		}
+		DungonType m_Type;
+		public DungonType Type {
+			get { return m_Type; }
+		}
 
 		// Use this for initialization
-		void Start () 
+		void Awake () 
 		{
 			m_Img = GetComponent<Image>();
 			m_OriginSpr = m_Img.sprite;
+			m_Type = DungonType.DT_WOLF;
+			m_IsSelected = false;
 		}
 
 		public void OnPointerClick(PointerEventData eventData)
 		{
+			m_IsSelected = !m_IsSelected;
 			if(m_IsSelected)
 			{
 				m_Img.transform.localScale *= 1.2f;
@@ -35,8 +47,6 @@ namespace ActioGame
 			{
 				m_Img.transform.localScale = Vector3.one;
 			}
-
-			m_IsSelected = !m_IsSelected;
 		}
 	}
 }

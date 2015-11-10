@@ -11,7 +11,7 @@ public class EffectManager : MonoBehaviour {
 	List<GameObject> m_Effect;
 
 	// Use this for initialization
-	void Start () 
+	void Awake () 
 	{
 	
 	}

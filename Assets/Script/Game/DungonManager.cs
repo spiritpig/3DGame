@@ -12,9 +12,13 @@ namespace ActionGame
 	public class DungonManager : MonoBehaviour, IManager {
 		public static DungonManager Inst;
 		private PlayerControl m_Player = null;
+		private SkillManager m_SkillManager = null;
 		private EnemyManager m_EnemyManager = null;
 		public PlayerControl Player {
 			get { return m_Player; }
+		}
+		public SkillManager SkillManager {
+			get { return m_SkillManager; }
 		}
 		private AttributePanel m_AttribPanel;
 		public AttributePanel AttribPanel {
@@ -42,9 +46,10 @@ namespace ActionGame
 		Transform m_PlayerSpawn;
 
 		// Use this for initialization
-		void Start () 
+		void Awake () 
 		{
 			m_Player = GameObject.FindGameObjectWithTag("Player").GetComponent<PlayerControl>();
+			m_SkillManager = GameObject.Find("SkillManager").GetComponent<SkillManager>();
 			m_EnemyManager = GameObject.FindGameObjectWithTag("EnemyManager").GetComponent<EnemyManager>();
 			m_AttribPanel = GameObject.Find("MainUICanvas/AttribPanel").GetComponent<AttributePanel>();
 			m_DamageHudControl = GameObject.Find("DamageHudCanvas").GetComponent<DamageHudControl>();

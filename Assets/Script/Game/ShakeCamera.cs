@@ -16,7 +16,7 @@ namespace ActionGame
 		private float shakeDelta =0.005f;
 		public static bool m_IsShakeCamera =false;
 		// Use this for initialization
-		void Start ()
+		void Awake ()
 		{
 			shakeTime = 1.0f;
 			fps= 60.0f;

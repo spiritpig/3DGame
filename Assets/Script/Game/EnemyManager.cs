@@ -22,9 +22,9 @@ namespace ActionGame
 		public void Init () 
 		{
 			m_EnemyList = new List<EnemyControl>();
-			foreach(GameObject go in GameObject.FindGameObjectsWithTag("Enemy"))
+			foreach(EnemyControl enemy in transform.GetComponentsInChildren<EnemyControl>())
 			{
-				m_EnemyList.Add(go.GetComponent<EnemyControl>());
+				m_EnemyList.Add(enemy);
 			}
 		}
 

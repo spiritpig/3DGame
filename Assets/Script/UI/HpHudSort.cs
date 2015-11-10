@@ -6,7 +6,7 @@ public class HpHudSort : MonoBehaviour {
 
 	List<Transform> m_ChildList;
 	// Use this for initialization
-	void Start () 
+	void Awake () 
 	{
 		m_ChildList = new List<Transform>();
 	}

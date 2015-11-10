@@ -21,6 +21,8 @@ namespace ActionGame
 		// Animation
 		public const float g_PlayerIdleAnimatTime = 1.0f;
 		public const float g_PlayerRunAnimatTime = 1.0f;
+		public const float g_PlayerAtkAnimatTime = 1.0f;
+		public const float g_PlayerMagicOneAnimatTime = 1.0f;
 
 		/// <summary>
 		/// Scene
@@ -61,6 +63,25 @@ namespace ActionGame
 			D_LEFTDOWN,
 			D_RIGHTUP,
 			D_RIGHTDOWN
+		}
+
+		public class SkillObjData
+		{
+			public float time;
+			public float timeMax;
+			public float moveSpeed;
+			public float atk;
+			public Transform transObj;
+			public SkillObj skillObj;
+
+			public SkillObjData()
+			{
+				time = 0.0f;
+				moveSpeed = 10.0f;
+				atk = 40.0f;
+				transObj = null;
+				skillObj = null;
+			}
 		}
 	}
 }
