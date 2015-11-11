@@ -4,6 +4,8 @@
 ///	保证： 附着的游戏对象具有RectTransform组件和Image组件(UGUI),并且使用UGUI
 /// 
 /// 补充，此处并没有完美的处理WIndows上和手机上的按键处理，侧重处理手机上的按键。WIndows仅供测试
+/// 
+/// 该类已废弃.
 /// </summary>
 
 using UnityEngine;

@@ -8,7 +8,7 @@ using System.Collections;
 
 namespace ActionGame
 {
-	interface IManager {
+	public interface IManager {
 
 		void OnAwake();
 		void OnSleep();

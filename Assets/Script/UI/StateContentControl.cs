@@ -1,5 +1,5 @@
 /// <summary>
-/// 类名: StateContent
+/// 类名: StateContentControl
 /// 描述: 控制状态面板中，状态信息部分的数据更新
 /// </summary>
 
@@ -9,7 +9,7 @@ using System.Collections;
 
 namespace ActionGame
 {
-	public class StateContent : MonoBehaviour {
+	public class StateContentControl : MonoBehaviour, IPanelContentControl {
 
 		PlayerControl.PlayerData m_Data;
 		Text m_NameText;
