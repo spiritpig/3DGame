@@ -12,6 +12,11 @@ namespace ActionGame
 	public abstract class PanelBase : MonoBehaviour {
 		protected bool m_ActiveFlag = false;
 		protected IPanelContentControl m_Content;
+		public IPanelContentControl Content {
+			get {
+				return m_Content;
+			}
+		}
 		
 		/// <summary>
 		/// 根据当前状态，切换面板的活动状态
@@ -25,16 +30,19 @@ namespace ActionGame
 			if( m_ActiveFlag )
 			{
 				transform.SetAsLastSibling();
-				_RefreshData();
+				RefreshData();
 			}
 		}
 		
 		/// <summary>
 		/// 刷新面板的数据
 		/// </summary>
-		protected virtual void _RefreshData()
+		public virtual void RefreshData()
 		{
-			m_Content.RefreshData();
+			if(m_Content != null)
+			{
+				m_Content.RefreshData();
+			}
 		}
 	}
 }

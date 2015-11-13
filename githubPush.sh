@@ -19,6 +19,8 @@ git add -A Assets/Resources/Prefab
 git add -A Assets/Resources/Prefab.meta
 git add -A Assets/Resources/Sprite
 git add -A Assets/Resources/Sprite.meta
+git add -A Assets/Resources/Sound
+git add -A Assets/Resources/Sound.meta
 git add -A Assets/Resources/order.txt
 git add -A Assets/Resources/order.txt.meta
 git add -A Assets/Scene

@@ -45,5 +45,10 @@ namespace ActionGame
 			m_HudObj.transform.position = m_CurPos;
 			m_HudObj.GetComponent<ValBarControl>().OnValueChange(m_Enemy.Data.attrib.hp/m_Enemy.Data.attrib.maxHp, "");
 		}
+
+		public void SetHpHudActive(bool flag)
+		{
+			m_HudObj.SetActive(flag);
+		}
 	}
 }

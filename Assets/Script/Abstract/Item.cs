@@ -8,12 +8,24 @@ using System.Collections;
 
 namespace ActionGame
 {
-	public abstract class Item : MonoBehaviour {
-		protected int m_Id;
-		protected string m_Name;
-		protected int m_Price;
-		protected string m_Info;
-		protected Texture m_ItemTex;
+	public abstract class Item {
+		protected int m_Id = 1;
+		public int Id {
+			get {
+				return m_Id;
+			}
+		}
+
+		protected string m_Name = "1";
+		protected int m_Price = 100;
+		protected string m_Info = "11";
+		protected int m_PosInPackage = -1;
+
+		protected Texture m_ItemTex = null;
+		public Texture ItemTex {
+			get { return m_ItemTex; }
+			set { m_ItemTex = value; }
+		}
 
 		/// <summary>
 		/// 处理被拾取的情况
