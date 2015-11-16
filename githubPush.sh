@@ -23,6 +23,8 @@ git add -A Assets/Resources/Sound
 git add -A Assets/Resources/Sound.meta
 git add -A Assets/Resources/order.txt
 git add -A Assets/Resources/order.txt.meta
+git add -A Assets/StreamingAssets
+git add -A Assets/StreamingAssets.meta
 git add -A Assets/Scene
 git add -A Assets/Scene.meta
 git add -A Assets/Script

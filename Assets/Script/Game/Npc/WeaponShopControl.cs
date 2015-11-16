@@ -1,4 +1,4 @@
-﻿/// <summary>
+/// <summary>
 /// 类名: WeaponShopControl
 /// 描述: 武器店老板控制脚本
 /// </summary>
@@ -35,12 +35,16 @@ namespace ActionGame
 				m_MousePos.y = Input.touches[0].position.y;
 				m_MousePos.z = 0.0f;
 #endif
-				// 射线检测判断有没点到NPC
-				Ray ray = Camera.main.ScreenPointToRay(m_MousePos);
-				RaycastHit hit;
-				if(m_Collider.Raycast(ray, out hit, Camera.main.farClipPlane))
+				// 判断玩家和NPC的距离是否靠近了可交互的距离， 若在距离内则射线检测判断有没点到NPC
+				float dist = Vector3.Distance(DungonManager.Inst.GetPlayerPosition() ,gameObject.transform.position);
+				if(dist <= Global.g_NpcInteractRange)
 				{
-					_ProcessClick();
+					Ray ray = Camera.main.ScreenPointToRay(m_MousePos);
+					RaycastHit hit;
+					if(m_Collider.Raycast(ray, out hit, Camera.main.farClipPlane))
+					{
+						_ProcessClick();
+					}
 				}
 			}
 		}

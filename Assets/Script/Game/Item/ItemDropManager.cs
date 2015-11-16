@@ -25,6 +25,8 @@ namespace ActionGame
 		/// </summary>
 		public int GetADropItem(EnemyControl.ENEMYTYPE type)
 		{
+			return 1;
+			/*
 			int id = Random.value > 0.5f ? 1 : 0;
 			if(Random.value > m_DropRateDict[id])
 			{
@@ -34,6 +36,7 @@ namespace ActionGame
 			{
 				return -1;
 			}
+			*/
 		}
 	}
 }

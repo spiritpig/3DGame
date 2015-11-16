@@ -130,5 +130,10 @@ namespace ActionGame
 		{
 			return m_Player.PackageManager.ItemList;
 		}
+
+		public Vector3 GetPlayerPosition() 
+		{
+			return m_Player.transform.position;
+		}
     }
 }

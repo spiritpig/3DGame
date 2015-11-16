@@ -25,6 +25,11 @@ namespace ActionGame
 		public const float g_PlayerMagicOneAnimatTime = 1.0f;
 
 		/// <summary>
+		/// NPC
+		/// </summary>
+		public const float g_NpcInteractRange = 5.0f;
+
+		/// <summary>
 		/// Scene
 		/// </summary>
 		public const string g_LoadingScene = "loading";

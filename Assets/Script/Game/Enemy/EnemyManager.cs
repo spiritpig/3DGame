@@ -1,4 +1,4 @@
-﻿/// <summary>
+/// <summary>
 /// 类名: EnemyManager
 /// 描述: 管理怪物列表,对怪物实行统一管理
 /// 注意: 此处需保证怪物在EnemyManager之前初始化完成
@@ -74,7 +74,7 @@ namespace ActionGame
 				{
 					// 怪物死亡了，产生掉落
 					int itemId = DungonManager.Inst.ItemDropManager.GetADropItem(EnemyControl.ENEMYTYPE.ET_WOLFMAN);
-					Item item = GlobalDataManager.Inst.GetItem(itemId);
+					Item item = GlobalGameDataManager.Inst.GetItem(itemId);
 					m_Item3DListController.SetAItem(item, m_EnemyList[i].GenItemDropPos());
 
 					// 移动怪物到后方
