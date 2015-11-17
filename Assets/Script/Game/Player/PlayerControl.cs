@@ -60,6 +60,7 @@ namespace ActionGame
 			public PLAYER_TYPE type;
 			public PLAYER_STATE state;
 			public Global.Attribute attrib;
+			public int gold;
 			public LevelData levelData;
 			public bool isInCity;
 
@@ -270,6 +271,7 @@ namespace ActionGame
 			m_Data.type = PLAYER_TYPE.PT_MAGE;
 			m_Data.state = PLAYER_STATE.PS_IDLE;
 			m_Data.isInCity = true;
+			m_Data.gold = 1000000000;
 
 			// 属性数据
 			m_Data.attrib.charName = "Mage";
@@ -600,5 +602,21 @@ namespace ActionGame
 			}
 		}
 
+		/// <summary>
+		/// 处理购买物品的情况
+		/// </summary>
+		public void OnBuy(Item item)
+		{
+			if(item.Price > m_Data.gold)
+			{
+				return;
+			}
+
+			m_Data.gold -= item.Price;
+			if(m_PackageManager.AddItem(item))
+			{
+				HintTextManager.Inst.ShowHintText("购买了" + item.Name, 2f );
+			}
+		}
 	}
 }

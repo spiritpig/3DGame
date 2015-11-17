@@ -29,7 +29,7 @@ namespace ActionGame
 		/// <summary>
 		/// 添加元素到背包中，不过需要找到背包中，下标最小的第一个空位置。
 		/// </summary>
-		public void AddItem(Item item)
+		public bool AddItem(Item item)
 		{
 			if(item != null)
 			{
@@ -41,8 +41,11 @@ namespace ActionGame
 				else
 				{
 					m_ItemList[index] = item;
+					return true;
 				}
 			}
+
+			return false;
 		}
 
 		public void RemoveItem(Item item)

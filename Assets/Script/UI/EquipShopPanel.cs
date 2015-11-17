@@ -4,11 +4,23 @@
 /// </summary>
 
 using UnityEngine;
+using UnityEngine.UI;
 using System.Collections;
 
 namespace ActionGame
 {
 	public class EquipShopPanel : PanelBase {
+		Transform m_EquipTypeGroup;
+	
+		void Start()
+		{
+			m_EquipTypeGroup = transform.FindChild("EquipType");
+			m_Content = transform.FindChild("EquipContent").GetComponent<EquipShopContentControl>();
+			m_Content.Init();
+			// 链接ToggleGroup
+			(m_Content as EquipShopContentControl).LinkToggleGroup(m_EquipTypeGroup);
 
+			gameObject.SetActive(false);
+		}
 	}
 }

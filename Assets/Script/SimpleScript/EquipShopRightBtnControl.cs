@@ -17,7 +17,7 @@ public class EquipShopRightBtnControl : BasePressButton {
 	{
 		m_EquipArea = transform.parent.GetComponentInChildren<ScrollRect>();
 		m_Velocity = new Vector2();
-		m_Velocity.x = -m_EquipArea.scrollSensitivity*100;
+		m_Velocity.x = -100.0f;
 	}
 	
 	public override void OnPress()

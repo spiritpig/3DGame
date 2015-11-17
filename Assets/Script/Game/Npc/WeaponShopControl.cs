@@ -16,7 +16,6 @@ namespace ActionGame
 		void Start () 
 		{
 			m_EquipShopPanel = GameObject.Find("MainUICanvas/EquipShopPanel").GetComponent<EquipShopPanel>();
-			m_EquipShopPanel.gameObject.SetActive(false);
 
 			m_Collider = GetComponent<CapsuleCollider>();
 			m_MousePos = new Vector3();
